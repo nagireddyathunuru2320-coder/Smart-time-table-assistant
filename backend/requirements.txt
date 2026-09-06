@@ -1,0 +1,9 @@
+alembic
+email-validator
+fastapi
+httpx
+psycopg2-binary
+pydantic-settings
+pytest
+sqlalchemy
+uvicorn[standard]

@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #F5F6FB;
+  --color-paper-dim: #ECEDF7;
+  --color-ink: #1E2130;
+  --color-ink-soft: #6B7280;
+  --color-ink-faint: #A0A5B8;
+  --color-navy: #6D5DFC;
+  --color-navy-dark: #5A4AE0;
+  --color-brass: #8B7CFA;
+  --color-brass-light: #EEEBFF;
+  --color-forest: #16A34A;
+  --color-forest-light: #E7F7EC;
+  --color-brick: #E11D48;
+  --color-brick-light: #FDECEF;
+  --font-display: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, ui-sans-serif, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, ui-sans-serif, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+}
+
+::selection {
+  background-color: var(--color-brass-light);
+  color: var(--color-ink);
+}
+
+* {
+  scrollbar-color: var(--color-ink-faint) var(--color-paper-dim);
+}
+
+.glass-panel {
+  background: #FFFFFF;
+  border: 1px solid rgba(30, 33, 48, 0.06);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
+}
+
+.gradient-text {
+  background: linear-gradient(90deg, var(--color-navy), var(--color-brass));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.fc {
+  --fc-border-color: rgba(30, 33, 48, 0.08);
+  --fc-page-bg-color: transparent;
+  --fc-neutral-bg-color: #F5F6FB;
+  --fc-list-event-hover-bg-color: #ECEDF7;
+  --fc-today-bg-color: rgba(109, 93, 252, 0.06);
+  --fc-event-border-color: transparent;
+  color: var(--color-ink);
+}
+
+.fc .fc-col-header-cell-cushion,
+.fc .fc-daygrid-day-number,
+.fc .fc-timegrid-slot-label-cushion {
+  color: var(--color-ink-soft);
+}
+
+.fc .fc-button {
+  background: #FFFFFF;
+  border: 1px solid rgba(30, 33, 48, 0.1);
+  color: var(--color-ink);
+  text-transform: capitalize;
+  box-shadow: none;
+}
+
+.fc .fc-button:hover {
+  background: var(--color-paper-dim);
+}
+
+.fc .fc-button-primary:not(:disabled).fc-button-active {
+  background: var(--color-navy);
+  border-color: var(--color-navy);
+  color: #FFFFFF;
+}
+
+.fc .fc-toolbar-title {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.fc-event {
+  border: none !important;
+}
