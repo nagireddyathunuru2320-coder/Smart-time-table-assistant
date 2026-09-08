@@ -2,9 +2,12 @@ alembic
 email-validator
 fastapi
 httpx
+cryptography
 psycopg2-binary
 pydantic-settings
 pytest
 sqlalchemy
 uvicorn[standard]
 slowapi
+openai
+tzdata

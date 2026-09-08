@@ -19,11 +19,11 @@ class UnmetNeed(BaseModel):
     unmet_minutes: int
 
 
-class NeedConsidered(BaseModel):
+class StudyNeedRead(BaseModel):
     entity_type: str
     entity_id: int
     title: str
-    deadline: str
+    deadline: datetime
     remaining_minutes: int
     priority: int
 
@@ -32,4 +32,5 @@ class StudyPlanResponse(BaseModel):
     horizon_days: int
     created: list[StudyPlanBlock]
     unmet: list[UnmetNeed]
-    needs_considered: list[NeedConsidered]
+    needs_considered: list[StudyNeedRead]
+

@@ -220,3 +220,74 @@ Phase 6: Subjects/Tasks/Exams frontend CRUD pages (backend already exists from P
 Phase 11: "Generate my study plan" button on the frontend (currently
 backend/docs-only), likely on the Dashboard or Calendar page.
 Then: Analytics (productivity_records) and/or AI/NL assistant layer.
+## Phase 14: CI Pipeline + API Hardening — COMPLETE
+
+- Added .github/workflows/ci.yml: runs backend pytest suite and frontend
+  lint+build automatically on every push/PR to main.
+- Added rate limiting (slowapi) on POST /auth/register (10/hour) and
+  POST /auth/login (10/minute) — the two classic brute-force targets.
+- Fixed a rate-limiter test-isolation bug: slowapi's in-memory storage
+  persists across tests since they share one app instance; added a
+  startup reset so each test run starts with clean rate-limit state
+  without weakening the real limits or modifying any existing test.
+- Added basic security headers middleware (X-Content-Type-Options,
+  X-Frame-Options, Referrer-Policy).
+- Backend tests: 72 passed, alembic check: no drift.
+- Fixed a real, documented npm cross-platform bug: @emnapi/core and
+  @emnapi/runtime are platform-conditional transitive dependencies (pulled
+  in via Tailwind's native/WASM binding) that npm only writes into
+  package-lock.json when generated on certain platforms. Lockfile
+  generated on Windows was missing entries GitHub's Linux runner required,
+  causing `npm ci` to fail with EUSAGE. Fixed by pinning both as explicit
+  top-level dependencies, forcing unconditional lockfile inclusion.
+- CI verified green on both jobs (backend + frontend) on both configured
+  GitHub remotes.
+
+### Remaining scope (not yet built):
+Calendar sync (Google/Microsoft OAuth), email notifications, further
+production hardening (Docker, deployment, monitoring).
+## Phase 15: Google Calendar Sync (One-Way, Read-Only) — COMPLETE
+
+- Backend: backend/app/integrations/google/ (oauth.py, calendar_client.py,
+  token_crypto.py) + services/calendar_sync_service.py + 
+  routers/calendar_accounts.py.
+- OAuth 2.0 flow: authorize URL generation, signed-state CSRF/identity
+  token (HMAC, carries user_id across the Google redirect since the
+  callback lands directly on the backend with no session cookie),
+  code-for-token exchange, refresh token handling.
+- Tokens encrypted at rest (Fernet, key derived from SECRET_KEY) before
+  being stored in calendar_accounts.access_token_encrypted /
+  refresh_token_encrypted.
+- Sync pulls events from Google Calendar's REST API (events.list,
+  60-day forward / 7-day back window), creates/updates/deletes
+  calendar_events rows tagged source="google", tracks results in
+  sync_logs (events_created/updated/deleted, status, error_message).
+- Frontend: "Connected calendars" section on Settings — connect button,
+  connection status, sync now, disconnect. OAuth callback redirects back
+  to /settings with a success/error banner.
+- Backend tests: 76 passed (deterministic pieces only — state signing/
+  verification, token encryption round-trip, auth-required/404 checks).
+  The actual OAuth exchange and Calendar API calls cannot be unit tested
+  and require a real Google account.
+- Fixed a real bug during manual testing: userinfo fetch required
+  email/profile scopes that weren't included in the original authorize
+  request (only calendar.readonly was requested), causing a 401. Fixed
+  by adding openid, userinfo.email, userinfo.profile scopes.
+- Manually verified end-to-end with a real Google account: connect →
+  consent screen → callback → sync → event created → event edited in
+  Google, re-synced, updated correctly in-app → event deleted in Google,
+  re-synced, removed correctly in-app.
+- Requires one-time setup (documented): Google Cloud project, OAuth
+  consent screen in Testing mode, test user allowlist, Client ID/Secret
+  in .env (not committed).
+
+### Feature set now complete:
+Auth, Profile/Preferences, Subjects/Tasks/Exams CRUD, Calendar Events CRUD,
+Conflict Detection, Free-Time Detection, Smart Study Block Allocation,
+AI/NL Assistant, Analytics Dashboard, In-App Notifications, Google Calendar
+Sync, CI Pipeline + API Hardening, full visual redesign.
+
+### Remaining scope (deliberately out of scope / optional):
+Microsoft Calendar sync, two-way sync, email notification channel,
+Docker/deployment, further production hardening (secrets manager,
+monitoring/logging infrastructure).

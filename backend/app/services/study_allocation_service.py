@@ -2,25 +2,14 @@
 blocks on the calendar.
 
 Triggered by an explicit user action (POST /schedule/generate-study-plan),
-never automatically.
+never automatically - consistent with the project rule that scheduling
+mutations require deliberate confirmation, not silent background writes.
 
-BUG FIX 1: the stale-block cleanup used to delete only blocks with
-start_at >= now (using the *current* call's "now"). Since real time always
-passes between two calls, a block created moments ago in a previous run
-(e.g. starting at 8:27) can have a start_at that is now in the past
-relative to a *second* call's "now" (e.g. 8:29) — even though it's still
-sitting on the calendar and hasn't actually happened. That block was
-neither deleted nor counted as busy, so a fresh block could be scheduled
-directly on top of it, creating a genuine overlap (visible as a Conflict).
-Fix: delete any of this user's ai_generated study_block events that
-haven't finished yet (end_at > now), not just ones starting after now.
-
-BUG FIX 2: exams were not treated as busy time when computing free slots,
-because they live in a separate `exams` table and are never written to
-calendar_events. This let study blocks get scheduled directly on top of
-a user's actual exam time. Fix: synthesize busy time windows from each
-upcoming exam (exam_at to exam_at + duration_minutes) and include them
-alongside real calendar events when computing free time.
+Regeneration is idempotent: every run deletes this user's previously
+auto-generated study blocks that haven't finished yet (source="ai_generated",
+event_type="study_block", end_at > now) and replaces them with a fresh plan
+computed from the current state of tasks/exams/calendar. Past study blocks
+are left untouched as history.
 """
 from __future__ import annotations
 
@@ -41,6 +30,12 @@ class StudyPlanResult:
     created: list[CalendarEvent] = field(default_factory=list)
     unmet: list[dict] = field(default_factory=list)
     needs_considered: list[dict] = field(default_factory=list)
+
+
+def _to_aware(dt: datetime) -> datetime:
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc)
+    return dt
 
 
 def generate_study_plan(db: Session, user: User, horizon_days: int = 14) -> StudyPlanResult:
@@ -80,7 +75,7 @@ def generate_study_plan(db: Session, user: User, horizon_days: int = 14) -> Stud
                 entity_id=task.id,
                 title=task.title,
                 remaining_minutes=remaining,
-                deadline=task.deadline_at,
+                deadline=_to_aware(task.deadline_at),
                 priority=task.priority,
             )
         )
@@ -93,14 +88,13 @@ def generate_study_plan(db: Session, user: User, horizon_days: int = 14) -> Stud
                 entity_id=exam.id,
                 title=exam.title,
                 remaining_minutes=exam.study_required_minutes,
-                deadline=exam.exam_at,
+                deadline=_to_aware(exam.exam_at),
                 priority=exam.priority,
             )
         )
 
     # Real calendar events count as busy, except this user's own previously
-    # auto-generated study blocks (those are being regenerated, not real
-    # obstacles).
+    # auto-generated study blocks (those are being regenerated).
     existing_events = list(
         db.scalars(
             select(CalendarEvent).where(
@@ -115,9 +109,6 @@ def generate_study_plan(db: Session, user: User, horizon_days: int = 14) -> Stud
         ).all()
     )
 
-    # Also block out each upcoming exam's own time window, even though exams
-    # aren't stored in calendar_events. These synthetic events are only used
-    # for this free-time calculation.
     exam_busy_blocks = [
         CalendarEvent(
             user_id=user.id,
@@ -216,3 +207,4 @@ def generate_study_plan(db: Session, user: User, horizon_days: int = 14) -> Stud
         unmet=unmet_list,
         needs_considered=needs_considered_list,
     )
+

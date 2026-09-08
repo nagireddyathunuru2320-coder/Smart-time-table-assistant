@@ -6,9 +6,20 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from app.config import settings
 from app.database import Base
 from app.dependencies import get_db
 from app.main import app
+
+
+@pytest.fixture(autouse=True)
+def _disable_external_providers(monkeypatch):
+    """Ensure tests never call real LLM or SMTP providers."""
+    monkeypatch.setattr(settings, "ai_provider", "mock")
+    monkeypatch.setattr(settings, "groq_api_key", "")
+    monkeypatch.setattr(settings, "smtp_host", "")
+    monkeypatch.setattr(settings, "smtp_username", "")
+    monkeypatch.setattr(settings, "smtp_password", "")
 
 
 @pytest.fixture()

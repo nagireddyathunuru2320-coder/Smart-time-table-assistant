@@ -8,7 +8,7 @@ from app.auth.dependencies import get_current_user
 from app.dependencies import get_db
 from app.models import CalendarEvent, User, UserPreference
 from app.schemas.schedule import FreeSlotRead
-from app.schemas.study_plan import NeedConsidered, StudyPlanBlock, StudyPlanResponse, UnmetNeed
+from app.schemas.study_plan import StudyNeedRead, StudyPlanBlock, StudyPlanResponse, UnmetNeed
 from app.scheduling.free_slots import find_free_slots
 from app.services.study_allocation_service import generate_study_plan
 
@@ -87,5 +87,5 @@ def generate_study_plan_endpoint(
         horizon_days=result.horizon_days,
         created=created_blocks,
         unmet=[UnmetNeed(**u) for u in result.unmet],
-        needs_considered=[NeedConsidered(**n) for n in result.needs_considered],
+        needs_considered=[StudyNeedRead(**need) for need in result.needs_considered],
     )

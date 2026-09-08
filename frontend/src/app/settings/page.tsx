@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSessionToken, backendUrl } from "@/lib/session";
 import { SettingsForm } from "@/components/settings/SettingsForm";
+import { ConnectedCalendars } from "@/components/settings/ConnectedCalendars";
 import type { User } from "@/lib/types";
 import type { Preferences } from "@/lib/settings-api";
 
@@ -39,6 +40,9 @@ export default async function SettingsPage() {
       <div className="mx-auto max-w-2xl">
         <h1 className="font-display mb-6 text-2xl font-semibold text-ink">Settings</h1>
         <SettingsForm initialUser={data.user} initialPreferences={data.preferences} />
+        <div className="mt-6">
+          <ConnectedCalendars />
+        </div>
       </div>
     </div>
   );

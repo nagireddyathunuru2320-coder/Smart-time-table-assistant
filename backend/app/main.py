@@ -9,7 +9,7 @@ from slowapi.util import get_remote_address
 
 from app.config import settings
 from app.database import engine
-from app.routers import academic, analytics, assistant, auth, calendar, conflicts, notifications, schedule, users
+from app.routers import academic, analytics, assistant, auth, calendar, calendar_accounts, conflicts, notifications, schedule, users
 
 
 @asynccontextmanager
@@ -55,6 +55,7 @@ app.include_router(schedule.router)  # Phase 9: free-time detection
 app.include_router(assistant.router)  # Phase 11: AI assistant (mock provider)
 app.include_router(analytics.router)  # Phase 12: analytics dashboard
 app.include_router(notifications.router)  # Phase 13: in-app notifications
+app.include_router(calendar_accounts.router)  # Phase 15: Google Calendar sync
 
 
 @app.get("/")
