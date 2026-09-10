@@ -59,7 +59,7 @@ export default async function DashboardPage() {
         <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <h1 className="font-display text-2xl font-bold tracking-tight text-ink md:text-3xl">
-              Good day, {user.full_name.split(" ")[0]} 👋
+              Good day, {user.full_name}!
             </h1>
             <p className="mt-1 text-xs text-ink-soft">Keep going. Progress looks great!</p>
           </div>

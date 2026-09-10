@@ -113,17 +113,19 @@ export function CalendarView({ initialEvents }: { initialEvents: CalendarEvent[]
           {error}
         </div>
       )}
-      <div className="glass-panel rounded-lg p-4 shadow-sm">
+      <div className="calendar-shell glass-panel rounded-lg p-3 shadow-sm sm:p-4">
         <FullCalendar
           ref={calendarRef}
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-          initialView="timeGridWeek"
+          initialView="dayGridMonth"
           headerToolbar={{
-            left: "prev,next today",
+            left: "prev,next",
             center: "title",
-            right: "dayGridMonth,timeGridWeek,timeGridDay",
+            right: "today,dayGridMonth,timeGridWeek,timeGridDay",
           }}
-          height="auto"
+          height="70vh"
+          contentHeight="auto"
+          expandRows
           selectable
           editable
           select={handleSelect}

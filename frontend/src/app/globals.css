@@ -152,3 +152,70 @@ body {
 }
 .fc .fc-toolbar-title { color: var(--color-ink); font-weight: 700; }
 .fc-event { border: none !important; border-radius: 8px !important; font-weight: 500; }
+
+.calendar-shell {
+  min-width: 0;
+}
+
+@media (max-width: 767px) {
+  .calendar-shell {
+    padding: 0.625rem;
+  }
+  .calendar-shell .fc {
+    font-size: 0.75rem;
+  }
+  .calendar-shell .fc-header-toolbar {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas:
+      "nav title today"
+      "views views views";
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+  .calendar-shell .fc-toolbar-chunk:first-child {
+    grid-area: nav;
+  }
+  .calendar-shell .fc-toolbar-chunk:nth-child(2) {
+    grid-area: title;
+    min-width: 0;
+    text-align: center;
+  }
+  .calendar-shell .fc-toolbar-chunk:last-child {
+    grid-area: views;
+    display: flex;
+    justify-content: center;
+  }
+  .calendar-shell .fc-toolbar-chunk:last-child .fc-button-group {
+    width: 100%;
+  }
+  .calendar-shell .fc-toolbar-chunk:last-child .fc-button {
+    flex: 1;
+  }
+  .calendar-shell .fc-toolbar-chunk:first-child .fc-today-button {
+    display: none;
+  }
+  .calendar-shell .fc-toolbar-title {
+    overflow: hidden;
+    font-size: 1rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .calendar-shell .fc-button {
+    min-height: 2rem;
+    padding: 0.35rem 0.5rem;
+    font-size: 0.7rem;
+  }
+  .calendar-shell .fc-daygrid-day-number {
+    padding: 0.3rem;
+  }
+  .calendar-shell .fc-daygrid-day-frame {
+    min-height: 3.8rem;
+  }
+  .calendar-shell .fc-event {
+    overflow: hidden;
+    padding: 0.1rem 0.2rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
