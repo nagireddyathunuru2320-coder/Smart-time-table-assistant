@@ -36,11 +36,16 @@ export default async function SettingsPage() {
   }
 
   return (
-    <div className="flex-1 px-6 py-8">
-      <div className="mx-auto max-w-2xl">
-        <h1 className="font-display mb-6 text-2xl font-semibold text-ink">Settings</h1>
+    <div className="flex-1 px-6 py-8 md:px-10">
+      <div className="mx-auto max-w-3xl">
+        <div className="mb-6">
+          <h1 className="font-display text-2xl font-bold tracking-tight text-ink">Settings</h1>
+          <p className="mt-1 text-xs text-ink-soft">
+            Manage your profile, study parameters, and external calendar connections.
+          </p>
+        </div>
         <SettingsForm initialUser={data.user} initialPreferences={data.preferences} />
-        <div className="mt-6">
+        <div className="mt-8">
           <ConnectedCalendars />
         </div>
       </div>

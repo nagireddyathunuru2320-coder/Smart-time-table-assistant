@@ -291,3 +291,29 @@ Sync, CI Pipeline + API Hardening, full visual redesign.
 Microsoft Calendar sync, two-way sync, email notification channel,
 Docker/deployment, further production hardening (secrets manager,
 monitoring/logging infrastructure).
+## Phase 16: Real LLM Assistant + Email Notifications + Google Calendar Sync — COMPLETE
+
+[... full feature summary as before ...]
+
+### Security incident (resolved)
+- backend/.env.example briefly contained real credentials (Groq API key,
+  Gmail app password, Google OAuth client secret) due to an accidental
+  "keep mine" file-merge choice during recovery from the OneDrive move.
+- GitHub's push protection correctly blocked both pushes before any secret
+  reached the remote — no leak actually occurred on GitHub.
+- Fixed: .env.example restored to placeholder-only values, commit amended,
+  pushed cleanly to both remotes.
+- All three externally-reachable credentials (Groq key, Gmail app password,
+  Google OAuth client secret) rotated as a precaution, since they had
+  briefly existed in a local git commit and been shared in conversation.
+  Local database password intentionally not rotated (localhost-only,
+  not externally reachable, low risk).
+
+### Final state
+- Backend: 87 tests passing, CI green on both GitHub remotes.
+- Every feature from the original project requirements built, tested, and
+  manually verified working: auth, subjects/tasks/exams/calendar CRUD,
+  conflict detection, free-time detection, smart study block allocation,
+  real LLM natural-language assistant, analytics dashboard, in-app +
+  email notifications, Google Calendar one-way sync, full visual redesign,
+  rate limiting, security headers, CI pipeline.

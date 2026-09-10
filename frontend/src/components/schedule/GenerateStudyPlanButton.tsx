@@ -50,7 +50,7 @@ export function GenerateStudyPlanButton({
         <button
           onClick={handleGenerate}
           disabled={loading}
-          className={`mt-3 rounded-md bg-navy px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-navy-dark disabled:opacity-50 ${variant === "compact" ? "mt-0" : ""}`}
+          className={`btn-specular gradient-accent mt-3 rounded-md px-4 py-2.5 text-sm font-medium text-white transition-colors disabled:opacity-50 ${variant === "compact" ? "mt-0" : ""}`}
         >
           {loading ? "Generating..." : "Generate study plan"}
         </button>

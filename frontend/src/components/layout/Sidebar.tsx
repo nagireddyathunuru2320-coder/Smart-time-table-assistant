@@ -46,26 +46,40 @@ export function Sidebar({ user }: { user: User | null }) {
   if (!user) return null;
 
   return (
-    <aside className="flex h-full w-64 shrink-0 flex-col overflow-y-auto bg-[#141726] px-4 py-6">
-      <div className="mb-8 flex items-center gap-2 px-2">
-        <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-navy text-white">
+    <aside className="desktop-sidebar flex h-full w-64 shrink-0 flex-col overflow-y-auto bg-[#0B1120] px-4 py-6">
+      <div className="mb-8 flex items-center gap-3 px-2">
+        <span className="gradient-accent flex h-10 w-10 items-center justify-center rounded-xl text-white shadow-sm">
           <CalendarClock size={20} />
         </span>
-        <span className="text-base font-semibold text-white">Smart Timetable</span>
+        <div>
+          <span className="block text-base font-bold tracking-tight text-white">Smart Timetable</span>
+          <span className="block text-[10px] tracking-wider text-white/40 uppercase">Plan · Learn · Achieve</span>
+        </div>
       </div>
       <nav className="flex flex-1 flex-col gap-1">
         {LINKS.map((link) => {
           const active = pathname === link.href || pathname.startsWith(link.href + "/");
           const Icon = link.icon;
           return (
-            <Link key={link.href} href={link.href} className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${active ? "bg-navy text-white" : "text-white/60 hover:bg-white/5 hover:text-white"}`}>
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`flex items-center gap-3 rounded-full px-4 py-2.5 text-sm font-medium transition-colors ${
+                active ? "gradient-accent text-white shadow-sm" : "text-white/60 hover:bg-white/5 hover:text-white"
+              }`}
+            >
               <Icon size={18} />
               {link.label}
             </Link>
           );
         })}
       </nav>
-      <Link href="/settings" className={`mb-3 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${pathname.startsWith("/settings") ? "bg-navy text-white" : "text-white/60 hover:bg-white/5 hover:text-white"}`}>
+      <Link
+        href="/settings"
+        className={`mb-3 flex items-center gap-3 rounded-full px-4 py-2.5 text-sm font-medium transition-colors ${
+          pathname.startsWith("/settings") ? "gradient-accent text-white shadow-sm" : "text-white/60 hover:bg-white/5 hover:text-white"
+        }`}
+      >
         <SettingsIcon size={18} />
         Settings
       </Link>

@@ -32,9 +32,12 @@ export default async function ExamsPage() {
   }
 
   return (
-    <div className="flex-1 px-6 py-8">
-      <div className="mx-auto max-w-5xl">
-        <h1 className="font-display mb-6 text-2xl font-semibold text-ink">Exams</h1>
+    <div className="flex-1 px-6 py-8 md:px-10">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-6">
+          <h1 className="font-display text-2xl font-bold tracking-tight text-ink">Exams</h1>
+          <p className="mt-1 text-xs text-ink-soft">Keep track of your upcoming exams and prepare effectively.</p>
+        </div>
         <ExamManager initialExams={data.exams} subjects={data.subjects} />
       </div>
     </div>

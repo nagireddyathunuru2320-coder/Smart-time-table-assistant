@@ -9,11 +9,12 @@ import {
   listCalendarAccounts,
   triggerSync,
 } from "@/lib/calendar-accounts-api";
+import { Calendar, RefreshCw } from "lucide-react";
 
 function statusBadgeClasses(status: string): string {
-  if (status === "synced") return "bg-forest-light text-forest";
-  if (status === "error") return "bg-brick-light text-brick";
-  return "bg-paper-dim text-ink-soft";
+  if (status === "synced") return "badge-done";
+  if (status === "error") return "badge-high";
+  return "badge-low";
 }
 
 export function ConnectedCalendars() {
@@ -86,35 +87,78 @@ export function ConnectedCalendars() {
   }
 
   return (
-    <div className="glass-panel flex flex-col gap-4 rounded-2xl p-6">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <h2 className="font-display text-lg font-semibold text-ink">Connected calendars</h2>
-          <p className="mt-1 text-sm text-ink-soft">Pull events from Google Calendar into your schedule (read-only, one-way).</p>
+    <div className="glass-panel flex flex-col gap-4 rounded-3xl p-6 sm:p-7 shadow-xs">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+        <div className="flex items-center gap-2.5">
+          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-50 text-teal-600">
+            <Calendar size={16} />
+          </span>
+          <div>
+            <h2 className="font-display text-base font-bold text-ink">Connected Calendars</h2>
+            <p className="mt-0.5 text-xs text-ink-soft">Pull events from Google Calendar into your schedule.</p>
+          </div>
         </div>
-        <button onClick={handleConnect} disabled={connecting} className="rounded-md bg-navy px-4 py-2 text-sm font-medium text-white hover:bg-navy-dark disabled:opacity-50">
+        <button
+          onClick={handleConnect}
+          disabled={connecting}
+          className="btn-specular gradient-accent rounded-xl px-4 py-2 text-xs font-bold text-white shadow-xs disabled:opacity-50"
+        >
           {connecting ? "Redirecting..." : "Connect Google Calendar"}
         </button>
       </div>
-      {banner && <p className="rounded-md bg-forest-light px-3 py-2 text-sm text-forest">{banner}</p>}
-      {error && <p className="rounded-md bg-brick-light px-3 py-2 text-sm text-brick">{error}</p>}
-      {loading ? <p className="text-sm text-ink-soft">Loading...</p> : accounts.length === 0 ? <p className="text-sm text-ink-soft">No calendars connected yet.</p> : (
+
+      {banner && (
+        <p className="rounded-xl bg-emerald-50 px-4 py-2.5 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200/50">
+          {banner}
+        </p>
+      )}
+
+      {error && (
+        <p className="rounded-xl bg-brick-light px-4 py-2.5 text-xs font-medium text-brick">
+          {error}
+        </p>
+      )}
+
+      {loading ? (
+        <p className="py-4 text-center text-xs text-ink-soft">Loading connected accounts...</p>
+      ) : accounts.length === 0 ? (
+        <p className="py-4 text-center text-xs text-ink-soft">No calendars connected yet.</p>
+      ) : (
         <ul className="flex flex-col gap-3">
           {accounts.map((account) => (
-            <li key={account.id} className="flex items-center justify-between rounded-xl border border-ink-faint/15 p-4">
+            <li
+              key={account.id}
+              className="flex items-center justify-between gap-4 rounded-2xl border border-ink/5 bg-paper/50 p-4"
+            >
               <div>
-                <p className="text-sm font-medium text-ink">{account.display_name}</p>
-                <p className="text-xs text-ink-soft">{account.email}</p>
-                <div className="mt-1 flex items-center gap-2">
-                  <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusBadgeClasses(account.sync_status)}`}>{account.sync_status}</span>
-                  {account.last_synced_at && <span className="text-xs text-ink-faint">Last synced {new Date(account.last_synced_at).toLocaleString()}</span>}
+                <p className="text-xs font-bold text-ink">{account.display_name}</p>
+                <p className="text-[11px] text-ink-soft">{account.email}</p>
+                <div className="mt-1.5 flex items-center gap-2">
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold capitalize ${statusBadgeClasses(account.sync_status)}`}>
+                    {account.sync_status}
+                  </span>
+                  {account.last_synced_at && (
+                    <span className="text-[10px] text-ink-faint">
+                      Synced {new Date(account.last_synced_at).toLocaleString()}
+                    </span>
+                  )}
                 </div>
               </div>
-              <div className="flex gap-2">
-                <button onClick={() => handleSync(account.id)} disabled={syncingId === account.id} className="rounded-md border border-ink-faint/25 px-3 py-1.5 text-sm text-ink-soft hover:bg-paper-dim disabled:opacity-50">
-                  {syncingId === account.id ? "Syncing..." : "Sync now"}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleSync(account.id)}
+                  disabled={syncingId === account.id}
+                  className="flex items-center gap-1 rounded-lg border border-ink/10 bg-white px-2.5 py-1 text-xs font-semibold text-ink-soft hover:bg-paper-dim disabled:opacity-50"
+                >
+                  <RefreshCw size={12} className={syncingId === account.id ? "animate-spin" : ""} />
+                  <span>{syncingId === account.id ? "Syncing..." : "Sync"}</span>
                 </button>
-                <button onClick={() => handleDisconnect(account.id)} className="rounded-md border border-brick/30 px-3 py-1.5 text-sm text-brick hover:bg-brick-light">Disconnect</button>
+                <button
+                  onClick={() => handleDisconnect(account.id)}
+                  className="rounded-lg border border-rose-200 bg-rose-50/70 px-2.5 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-100"
+                >
+                  Disconnect
+                </button>
               </div>
             </li>
           ))}

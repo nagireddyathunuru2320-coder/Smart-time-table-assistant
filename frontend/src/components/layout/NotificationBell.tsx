@@ -9,6 +9,11 @@ import {
   markNotificationRead,
 } from "@/lib/notifications-api";
 
+async function listInAppNotifications(): Promise<Notification[]> {
+  const notifications = await listNotifications();
+  return notifications.filter((notification) => notification.channel === "in_app");
+}
+
 function timeAgo(iso: string): string {
   const diffMs = Date.now() - new Date(iso).getTime();
   const mins = Math.floor(diffMs / 60000);
@@ -25,22 +30,37 @@ export function NotificationBell() {
   const [loaded, setLoaded] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
+  const mountedRef = useRef(true);
+
   async function refresh() {
     try {
-      const data = await listNotifications();
-      setNotifications(data);
+      const data = await listInAppNotifications();
+      if (mountedRef.current) setNotifications(data);
     } catch {
       // Keep the existing list if a background refresh fails.
     } finally {
-      setLoaded(true);
+      if (mountedRef.current) setLoaded(true);
     }
   }
 
   useEffect(() => {
-    const initialRefresh = window.setTimeout(() => void refresh(), 0);
-    const interval = setInterval(refresh, 60000);
+    mountedRef.current = true;
+    async function loadInitialNotifications() {
+      try {
+        const data = await listInAppNotifications();
+        if (mountedRef.current) setNotifications(data);
+      } catch {
+        // Keep the initial list empty if loading fails.
+      } finally {
+        if (mountedRef.current) setLoaded(true);
+      }
+    }
+
+    void loadInitialNotifications();
+    // Poll every 60 seconds
+    const interval = setInterval(() => void refresh(), 60000);
     return () => {
-      window.clearTimeout(initialRefresh);
+      mountedRef.current = false;
       clearInterval(interval);
     };
   }, []);

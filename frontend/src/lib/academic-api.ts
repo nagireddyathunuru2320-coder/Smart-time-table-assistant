@@ -88,6 +88,7 @@ export interface TaskInput {
   estimated_minutes?: number;
   deadline_at?: string | null;
   status?: string;
+  completed_at?: string | null;
 }
 
 export async function listTasks(): Promise<Task[]> {

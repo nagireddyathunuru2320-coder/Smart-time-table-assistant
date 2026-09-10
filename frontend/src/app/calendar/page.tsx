@@ -25,10 +25,15 @@ export default async function CalendarPage() {
   }
 
   return (
-    <div className="flex-1 px-6 py-8">
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="font-display text-2xl font-semibold text-ink">Calendar</h1>
+    <div className="flex-1 px-6 py-8 md:px-10">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+          <div>
+            <h1 className="font-display text-2xl font-bold tracking-tight text-ink">Calendar</h1>
+            <p className="mt-1 text-xs text-ink-soft">
+              Organize your study schedule and never miss an important date.
+            </p>
+          </div>
           <GenerateStudyPlanButton variant="compact" />
         </div>
         <CalendarPageContent events={events} />

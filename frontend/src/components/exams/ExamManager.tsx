@@ -9,7 +9,7 @@ import {
   deleteExam,
 } from "@/lib/academic-api";
 import type { Subject } from "@/lib/academic-api";
-import { GraduationCap } from "lucide-react";
+import { GraduationCap, Plus, Calendar, MapPin, Clock } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 const EMPTY_FORM: ExamInput = {
@@ -38,11 +38,11 @@ function daysUntil(iso: string): number {
 
 function countdownBadge(iso: string): { text: string; classes: string } {
   const days = daysUntil(iso);
-  if (days < 0) return { text: "Past", classes: "bg-paper-dim text-ink-faint" };
-  if (days === 0) return { text: "Today", classes: "bg-brick-light text-brick" };
-  if (days <= 3) return { text: `${days}d left`, classes: "bg-brick-light text-brick" };
-  if (days <= 7) return { text: `${days}d left`, classes: "bg-brass-light/50 text-ink" };
-  return { text: `${days}d left`, classes: "bg-forest-light text-forest" };
+  if (days < 0) return { text: "Past", classes: "badge-done" };
+  if (days === 0) return { text: "Today", classes: "badge-high" };
+  if (days <= 3) return { text: `In ${days} days`, classes: "badge-high" };
+  if (days <= 7) return { text: `In ${days} days`, classes: "badge-medium" };
+  return { text: `In ${days} days`, classes: "badge-low" };
 }
 
 export function ExamManager({
@@ -57,6 +57,7 @@ export function ExamManager({
   const [editingId, setEditingId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [tab, setTab] = useState<"upcoming" | "past">("upcoming");
 
   function subjectName(id: number | null): string | null {
     if (id === null) return null;
@@ -98,6 +99,7 @@ export function ExamManager({
       exam_at: form.exam_at ? new Date(form.exam_at).toISOString() : form.exam_at,
       location: form.location || null,
       notes: form.notes || null,
+      subject_id: form.subject_id ? Number(form.subject_id) : null,
     };
 
     try {
@@ -130,97 +132,291 @@ export function ExamManager({
     }
   }
 
-  const sortedExams = [...exams].sort(
-    (a, b) => new Date(a.exam_at).getTime() - new Date(b.exam_at).getTime(),
+  const upcomingCount = exams.filter((e) => daysUntil(e.exam_at) >= 0).length;
+  const pastCount = exams.filter((e) => daysUntil(e.exam_at) < 0).length;
+
+  const filteredExams = exams.filter((e) => {
+    const d = daysUntil(e.exam_at);
+    return tab === "upcoming" ? d >= 0 : d < 0;
+  });
+
+  const sortedExams = [...filteredExams].sort(
+    (a, b) => new Date(a.exam_at).getTime() - new Date(b.exam_at).getTime()
   );
 
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+      {/* Left Column Form */}
       <div className="lg:col-span-1">
-        <form onSubmit={handleSubmit} className="glass-panel flex flex-col gap-4 rounded-2xl p-6 shadow-sm">
-          <h2 className="font-display text-lg font-semibold text-ink">
-            {editingId !== null ? "Edit exam" : "New exam"}
-          </h2>
-          <div>
-            <label className="mb-1 block text-sm font-medium text-ink">Title</label>
-            <input type="text" required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full rounded-md border border-ink-faint/25 px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-navy" />
+        <form
+          onSubmit={handleSubmit}
+          className="glass-panel flex flex-col gap-4 rounded-3xl p-6 sm:p-7 shadow-xs"
+        >
+          <div className="flex items-center gap-2">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-teal-50 text-teal-600">
+              <Plus size={16} />
+            </span>
+            <h2 className="font-display text-base font-bold text-ink">
+              {editingId !== null ? "Edit Exam" : "Add New Exam"}
+            </h2>
           </div>
+
           <div>
-            <label className="mb-1 block text-sm font-medium text-ink">Subject</label>
-            <select value={form.subject_id ?? ""} onChange={(e) => setForm({ ...form, subject_id: e.target.value ? Number(e.target.value) : null })} className="w-full rounded-md border border-ink-faint/25 px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-navy">
-              <option value="">No subject</option>
-              {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+            <label className="mb-1 block text-xs font-semibold text-ink">Title</label>
+            <input
+              type="text"
+              required
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
+              placeholder="e.g. Data Structures Final"
+              className="glass-input w-full px-3.5 py-2 text-xs text-ink outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-xs font-semibold text-ink">Subject</label>
+            <select
+              value={form.subject_id ?? ""}
+              onChange={(e) =>
+                setForm({ ...form, subject_id: e.target.value ? Number(e.target.value) : null })
+              }
+              className="glass-input w-full px-3.5 py-2 text-xs text-ink outline-none"
+            >
+              <option value="">Select subject</option>
+              {subjects.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name} {s.code ? `(${s.code})` : ""}
+                </option>
+              ))}
             </select>
           </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-ink">Date & Time</label>
+              <input
+                type="datetime-local"
+                required
+                value={form.exam_at}
+                onChange={(e) => setForm({ ...form, exam_at: e.target.value })}
+                className="glass-input w-full px-3.5 py-2 text-xs text-ink outline-none"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-ink">Duration (min)</label>
+              <input
+                type="number"
+                min={1}
+                max={1440}
+                value={form.duration_minutes}
+                onChange={(e) => setForm({ ...form, duration_minutes: Number(e.target.value) })}
+                className="glass-input w-full px-3.5 py-2 text-xs text-ink outline-none"
+              />
+            </div>
+          </div>
+
           <div>
-            <label className="mb-1 block text-sm font-medium text-ink">Date & time</label>
-            <input type="datetime-local" required value={form.exam_at} onChange={(e) => setForm({ ...form, exam_at: e.target.value })} className="w-full rounded-md border border-ink-faint/25 px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-navy" />
+            <label className="mb-1 block text-xs font-semibold text-ink">Location</label>
+            <input
+              type="text"
+              value={form.location ?? ""}
+              onChange={(e) => setForm({ ...form, location: e.target.value })}
+              placeholder="e.g. Room 101, Hall B (optional)"
+              className="glass-input w-full px-3.5 py-2 text-xs text-ink outline-none"
+            />
           </div>
+
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-sm font-medium text-ink">Duration (min)</label>
-              <input type="number" min={1} max={1440} value={form.duration_minutes} onChange={(e) => setForm({ ...form, duration_minutes: Number(e.target.value) })} className="w-full rounded-md border border-ink-faint/25 px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-navy" />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-ink">Location</label>
-              <input type="text" value={form.location ?? ""} onChange={(e) => setForm({ ...form, location: e.target.value })} className="w-full rounded-md border border-ink-faint/25 px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-navy" />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="mb-1 block text-sm font-medium text-ink">Difficulty</label>
-              <select value={form.difficulty} onChange={(e) => setForm({ ...form, difficulty: Number(e.target.value) })} className="w-full rounded-md border border-ink-faint/25 px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-navy">
-                {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>{n}</option>)}
+              <label className="mb-1 block text-xs font-semibold text-ink">Difficulty</label>
+              <select
+                value={form.difficulty}
+                onChange={(e) => setForm({ ...form, difficulty: Number(e.target.value) })}
+                className="glass-input w-full px-3.5 py-2 text-xs text-ink outline-none"
+              >
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <option key={n} value={n}>
+                    {n} / 5
+                  </option>
+                ))}
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-ink">Priority</label>
-              <select value={form.priority} onChange={(e) => setForm({ ...form, priority: Number(e.target.value) })} className="w-full rounded-md border border-ink-faint/25 px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-navy">
-                {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>{n}</option>)}
+              <label className="mb-1 block text-xs font-semibold text-ink">Priority</label>
+              <select
+                value={form.priority}
+                onChange={(e) => setForm({ ...form, priority: Number(e.target.value) })}
+                className="glass-input w-full px-3.5 py-2 text-xs text-ink outline-none"
+              >
+                <option value={1}>1 - Low</option>
+                <option value={2}>2 - Low</option>
+                <option value={3}>3 - Medium</option>
+                <option value={4}>4 - High</option>
+                <option value={5}>5 - Urgent</option>
               </select>
             </div>
           </div>
+
           <div>
-            <label className="mb-1 block text-sm font-medium text-ink">Study time needed (minutes)</label>
-            <input type="number" min={0} max={10080} value={form.study_required_minutes} onChange={(e) => setForm({ ...form, study_required_minutes: Number(e.target.value) })} className="w-full rounded-md border border-ink-faint/25 px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-navy" />
+            <label className="mb-1 block text-xs font-semibold text-ink">Study time needed (min)</label>
+            <input
+              type="number"
+              min={0}
+              max={10080}
+              value={form.study_required_minutes}
+              onChange={(e) => setForm({ ...form, study_required_minutes: Number(e.target.value) })}
+              className="glass-input w-full px-3.5 py-2 text-xs text-ink outline-none"
+            />
           </div>
+
           <div>
-            <label className="mb-1 block text-sm font-medium text-ink">Notes</label>
-            <textarea value={form.notes ?? ""} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={3} className="w-full rounded-md border border-ink-faint/25 px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-navy" />
+            <label className="mb-1 block text-xs font-semibold text-ink">Notes</label>
+            <textarea
+              value={form.notes ?? ""}
+              onChange={(e) => setForm({ ...form, notes: e.target.value })}
+              rows={2}
+              placeholder="Topics, formulas, or reminders"
+              className="glass-input w-full px-3.5 py-2 text-xs text-ink outline-none"
+            />
           </div>
-          {error && <p className="rounded-md bg-brick-light px-3 py-2 text-sm text-brick">{error}</p>}
+
+          {error && (
+            <p className="rounded-xl bg-brick-light px-3.5 py-2 text-xs font-medium text-brick">
+              {error}
+            </p>
+          )}
+
           <div className="flex gap-2">
-            <button type="submit" disabled={submitting} className="flex-1 rounded-md bg-navy px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-navy-dark disabled:opacity-50">
-              {submitting ? "Saving..." : editingId !== null ? "Save changes" : "Add exam"}
+            <button
+              type="submit"
+              disabled={submitting}
+              className="btn-specular gradient-accent flex-1 rounded-xl py-2.5 text-xs font-bold text-white shadow-xs disabled:opacity-50"
+            >
+              {submitting ? "Saving..." : editingId !== null ? "Save Changes" : "Add Exam"}
             </button>
-            {editingId !== null && <button type="button" onClick={cancelEdit} className="rounded-md border border-ink-faint/25 px-4 py-2.5 text-sm text-ink-soft hover:bg-paper-dim">Cancel</button>}
+            {editingId !== null && (
+              <button
+                type="button"
+                onClick={cancelEdit}
+                className="rounded-xl border border-ink-faint/25 bg-white px-4 py-2.5 text-xs font-semibold text-ink-soft hover:bg-paper-dim"
+              >
+                Cancel
+              </button>
+            )}
           </div>
         </form>
       </div>
+
+      {/* Right Column List */}
       <div className="lg:col-span-2">
+        {/* Tab switcher */}
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-1.5 rounded-full border border-ink/5 bg-white/70 p-1 backdrop-blur-md">
+            <button
+              onClick={() => setTab("upcoming")}
+              className={`rounded-full px-3.5 py-1 text-xs font-semibold transition-all ${
+                tab === "upcoming"
+                  ? "gradient-accent text-white shadow-xs"
+                  : "text-ink-soft hover:text-ink"
+              }`}
+            >
+              Upcoming ({upcomingCount})
+            </button>
+            <button
+              onClick={() => setTab("past")}
+              className={`rounded-full px-3.5 py-1 text-xs font-semibold transition-all ${
+                tab === "past"
+                  ? "gradient-accent text-white shadow-xs"
+                  : "text-ink-soft hover:text-ink"
+              }`}
+            >
+              Past ({pastCount})
+            </button>
+          </div>
+        </div>
+
         {sortedExams.length === 0 ? (
-          <EmptyState icon={GraduationCap} title="No exams yet!" description="Add your first exam to get started." />
+          <EmptyState
+            icon={GraduationCap}
+            title={tab === "past" ? "No past exams recorded!" : "No upcoming exams!"}
+            description="Add your midterms, finals, or quizzes to stay prepared."
+          />
         ) : (
           <ul className="flex flex-col gap-3">
             {sortedExams.map((exam) => {
               const badge = countdownBadge(exam.exam_at);
               return (
-                <li key={exam.id} className="glass-panel flex items-start justify-between overflow-hidden rounded-2xl shadow-sm" style={{ borderLeft: `5px solid ${subjectColor(exam.subject_id)}` }}>
-                  <div className="flex-1 px-5 py-4">
-                    <div className="flex items-center gap-2">
-                      <p className="font-display font-medium text-ink">{exam.title}</p>
-                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${badge.classes}`}>{badge.text}</span>
+                <li
+                  key={exam.id}
+                  className="glass-panel flex items-start justify-between overflow-hidden rounded-2xl p-4 shadow-xs"
+                  style={{ borderLeft: `5px solid ${subjectColor(exam.subject_id)}` }}
+                >
+                  <div className="flex flex-1 items-start gap-3.5">
+                    <span
+                      className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white shadow-xs"
+                      style={{ backgroundColor: subjectColor(exam.subject_id) }}
+                    >
+                      <GraduationCap size={18} />
+                    </span>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-display text-sm font-bold text-ink">{exam.title}</p>
+                        {subjectName(exam.subject_id) && (
+                          <span className="rounded-full bg-paper px-2 py-0.5 text-[10px] font-semibold text-ink-soft">
+                            {subjectName(exam.subject_id)}
+                          </span>
+                        )}
+                        <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${badge.classes}`}>
+                          {badge.text}
+                        </span>
+                      </div>
+
+                      <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-ink-soft">
+                        <span className="flex items-center gap-1">
+                          <Calendar size={12} className="text-ink-faint" />
+                          {new Date(exam.exam_at).toLocaleDateString(undefined, {
+                            month: "short",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </span>
+                        <span>·</span>
+                        <span className="flex items-center gap-1">
+                          <Clock size={12} className="text-ink-faint" />
+                          {exam.duration_minutes} min
+                        </span>
+                        {exam.location && (
+                          <>
+                            <span>·</span>
+                            <span className="flex items-center gap-1">
+                              <MapPin size={12} className="text-ink-faint" />
+                              {exam.location}
+                            </span>
+                          </>
+                        )}
+                      </div>
+
+                      <p className="mt-2 text-[11px] text-ink-soft">
+                        <span className="font-semibold text-ink">{exam.study_required_minutes} min</span> study recommended
+                      </p>
                     </div>
-                    <p className="mt-0.5 font-mono text-xs text-ink-soft">
-                      {new Date(exam.exam_at).toLocaleString()} · {exam.duration_minutes} min
-                      {exam.location ? ` · ${exam.location}` : ""}
-                      {subjectName(exam.subject_id) ? ` · ${subjectName(exam.subject_id)}` : ""}
-                    </p>
-                    <p className="mt-1 text-sm text-ink-soft">{exam.study_required_minutes} min of study recommended</p>
                   </div>
-                  <div className="flex gap-2 px-5 py-4">
-                    <button onClick={() => startEdit(exam)} className="rounded-md border border-ink-faint/25 px-3 py-1.5 text-sm text-ink-soft hover:bg-paper-dim">Edit</button>
-                    <button onClick={() => handleDelete(exam.id)} className="rounded-md border border-brick/30 px-3 py-1.5 text-sm text-brick hover:bg-brick-light">Delete</button>
+
+                  <div className="flex shrink-0 items-center gap-1.5 pl-2">
+                    <button
+                      onClick={() => startEdit(exam)}
+                      className="rounded-lg border border-ink/10 bg-white/80 px-2.5 py-1 text-xs font-semibold text-ink-soft hover:bg-paper-dim"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(exam.id)}
+                      className="rounded-lg border border-rose-200 bg-rose-50/70 px-2.5 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-100"
+                    >
+                      Delete
+                    </button>
                   </div>
                 </li>
               );

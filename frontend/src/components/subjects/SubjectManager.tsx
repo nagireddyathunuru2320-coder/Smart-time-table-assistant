@@ -8,13 +8,13 @@ import {
   updateSubject,
   deleteSubject,
 } from "@/lib/academic-api";
-import { BookOpen } from "lucide-react";
+import { BookOpen, Plus } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 const EMPTY_FORM: SubjectInput = {
   name: "",
   code: "",
-  color: "#2B3A55",
+  color: "#14B8A6",
   instructor: "",
   difficulty: 3,
   weekly_target_minutes: 180,
@@ -90,67 +90,75 @@ export function SubjectManager({ initialSubjects }: { initialSubjects: Subject[]
 
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+      {/* Left Form Column */}
       <div className="lg:col-span-1">
         <form
           onSubmit={handleSubmit}
-          className="glass-panel flex flex-col gap-4 rounded-2xl p-6 shadow-sm"
+          className="glass-panel flex flex-col gap-4 rounded-3xl p-6 sm:p-7 shadow-xs"
         >
-          <h2 className="font-display text-lg font-semibold text-ink">
-            {editingId !== null ? "Edit subject" : "New subject"}
-          </h2>
+          <div className="flex items-center gap-2">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-teal-50 text-teal-600">
+              <Plus size={16} />
+            </span>
+            <h2 className="font-display text-base font-bold text-ink">
+              {editingId !== null ? "Edit Subject" : "New Subject"}
+            </h2>
+          </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-ink">Name</label>
+            <label className="mb-1 block text-xs font-semibold text-ink">Name</label>
             <input
               type="text"
               required
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full rounded-md border border-ink-faint/25 px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-navy"
+              placeholder="e.g. Mathematics"
+              className="glass-input w-full px-3.5 py-2 text-xs text-ink outline-none"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-ink">Code</label>
+            <label className="mb-1 block text-xs font-semibold text-ink">Code</label>
             <input
               type="text"
               value={form.code ?? ""}
               onChange={(e) => setForm({ ...form, code: e.target.value })}
-              placeholder="e.g. CS101"
-              className="w-full rounded-md border border-ink-faint/25 px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-navy"
+              placeholder="e.g. MATH101"
+              className="glass-input w-full px-3.5 py-2 text-xs text-ink outline-none"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-ink">Instructor</label>
+            <label className="mb-1 block text-xs font-semibold text-ink">Instructor</label>
             <input
               type="text"
               value={form.instructor ?? ""}
               onChange={(e) => setForm({ ...form, instructor: e.target.value })}
-              className="w-full rounded-md border border-ink-faint/25 px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-navy"
+              placeholder="e.g. Dr. Smith"
+              className="glass-input w-full px-3.5 py-2 text-xs text-ink outline-none"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-sm font-medium text-ink">Color</label>
+              <label className="mb-1 block text-xs font-semibold text-ink">Color</label>
               <input
                 type="color"
                 value={form.color}
                 onChange={(e) => setForm({ ...form, color: e.target.value })}
-                className="h-10 w-full rounded-md border border-ink-faint/25"
+                className="h-9 w-full cursor-pointer rounded-xl border border-ink-faint/25 bg-white p-1"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-ink">Difficulty</label>
+              <label className="mb-1 block text-xs font-semibold text-ink">Difficulty</label>
               <select
                 value={form.difficulty}
                 onChange={(e) => setForm({ ...form, difficulty: Number(e.target.value) })}
-                className="w-full rounded-md border border-ink-faint/25 px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-navy"
+                className="glass-input w-full px-3.5 py-2 text-xs text-ink outline-none"
               >
                 {[1, 2, 3, 4, 5].map((n) => (
                   <option key={n} value={n}>
-                    {n}
+                    {n} / 5
                   </option>
                 ))}
               </select>
@@ -158,8 +166,8 @@ export function SubjectManager({ initialSubjects }: { initialSubjects: Subject[]
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-ink">
-              Weekly target (minutes)
+            <label className="mb-1 block text-xs font-semibold text-ink">
+              Weekly Target (minutes)
             </label>
             <input
               type="number"
@@ -169,35 +177,40 @@ export function SubjectManager({ initialSubjects }: { initialSubjects: Subject[]
               onChange={(e) =>
                 setForm({ ...form, weekly_target_minutes: Number(e.target.value) })
               }
-              className="w-full rounded-md border border-ink-faint/25 px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-navy"
+              className="glass-input w-full px-3.5 py-2 text-xs text-ink outline-none"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-ink">Notes</label>
+            <label className="mb-1 block text-xs font-semibold text-ink">Notes</label>
             <textarea
               value={form.notes ?? ""}
               onChange={(e) => setForm({ ...form, notes: e.target.value })}
-              rows={3}
-              className="w-full rounded-md border border-ink-faint/25 px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-navy"
+              rows={2}
+              placeholder="Optional notes"
+              className="glass-input w-full px-3.5 py-2 text-xs text-ink outline-none"
             />
           </div>
 
-          {error && <p className="rounded-md bg-brick-light px-3 py-2 text-sm text-brick">{error}</p>}
+          {error && (
+            <p className="rounded-xl bg-brick-light px-3.5 py-2 text-xs font-medium text-brick">
+              {error}
+            </p>
+          )}
 
           <div className="flex gap-2">
             <button
               type="submit"
               disabled={submitting}
-              className="flex-1 rounded-md bg-navy px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-navy-dark disabled:opacity-50"
+              className="btn-specular gradient-accent flex-1 rounded-xl py-2.5 text-xs font-bold text-white shadow-xs disabled:opacity-50"
             >
-              {submitting ? "Saving..." : editingId !== null ? "Save changes" : "Add subject"}
+              {submitting ? "Saving..." : editingId !== null ? "Save Changes" : "Add Subject"}
             </button>
             {editingId !== null && (
               <button
                 type="button"
                 onClick={cancelEdit}
-                className="rounded-md border border-ink-faint/25 px-4 py-2.5 text-sm text-ink-soft hover:bg-paper-dim"
+                className="rounded-xl border border-ink-faint/25 bg-white px-4 py-2.5 text-xs font-semibold text-ink-soft hover:bg-paper-dim"
               >
                 Cancel
               </button>
@@ -206,54 +219,75 @@ export function SubjectManager({ initialSubjects }: { initialSubjects: Subject[]
         </form>
       </div>
 
+      {/* Right Grid Column of Subject Cards */}
       <div className="lg:col-span-2">
         {subjects.length === 0 ? (
-          <EmptyState icon={BookOpen} title="No subjects yet!" description="Add your first subject to get started." />
+          <EmptyState
+            icon={BookOpen}
+            title="No subjects yet!"
+            description="Add your first subject to organize your curriculum and tracks."
+          />
         ) : (
-          <ul className="flex flex-col gap-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2" aria-label="Subjects">
             {subjects.map((subject) => (
-              <li
+              <div
                 key={subject.id}
-                className="glass-panel flex items-center justify-between overflow-hidden rounded-2xl shadow-sm"
-                style={{ borderLeft: `5px solid ${subject.color}` }}
+                className="glass-panel flex flex-col justify-between rounded-3xl p-5 shadow-xs"
+                style={{ borderTop: `4px solid ${subject.color}` }}
               >
-                <div className="flex items-center gap-3">
-                  <span
-                    className="h-4 w-4 shrink-0 rounded-full"
-                    style={{ backgroundColor: subject.color }}
-                  />
-                  <div>
-                    <p className="font-display font-medium text-ink">
-                      {subject.name}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white shadow-xs"
+                      style={{ backgroundColor: subject.color }}
+                    >
+                      <BookOpen size={18} />
+                    </span>
+                    <div>
+                      <p className="font-display text-sm font-bold text-ink">
+                        {subject.name}
+                      </p>
                       {subject.code && (
-                        <span className="ml-2 font-mono text-xs font-normal text-ink-faint">
+                        <p className="font-mono text-[11px] font-semibold text-ink-faint">
                           {subject.code}
-                        </span>
+                        </p>
                       )}
-                    </p>
-                    <p className="mt-0.5 text-sm text-ink-soft">
-                      {subject.instructor ? `${subject.instructor} · ` : ""}
-                      Difficulty {subject.difficulty}/5 · {subject.weekly_target_minutes} min/week
-                    </p>
+                    </div>
                   </div>
+
                 </div>
-                <div className="flex gap-2">
+
+                <div className="mt-4 border-t border-ink/5 pt-3 text-xs text-ink-soft">
+                  <p className="flex items-center justify-between">
+                    <span>Target: {subject.weekly_target_minutes} min/wk</span>
+                    <span className="font-semibold text-ink">
+                      Diff {subject.difficulty}/5
+                    </span>
+                  </p>
+                  {subject.instructor && (
+                    <p className="mt-1 truncate text-[11px] text-ink-faint">
+                      Prof: {subject.instructor}
+                    </p>
+                  )}
+                </div>
+
+                <div className="mt-4 flex items-center justify-end gap-2">
                   <button
                     onClick={() => startEdit(subject)}
-                    className="rounded-md border border-ink-faint/25 px-3 py-1.5 text-sm text-ink-soft hover:bg-paper-dim"
+                    className="rounded-lg border border-ink/10 bg-white/80 px-2.5 py-1 text-xs font-semibold text-ink-soft hover:bg-paper-dim"
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => handleDelete(subject.id)}
-                    className="rounded-md border border-brick/30 px-3 py-1.5 text-sm text-brick hover:bg-brick-light"
+                    className="rounded-lg border border-rose-200 bg-rose-50/70 px-2.5 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-100"
                   >
                     Delete
                   </button>
                 </div>
-              </li>
+              </div>
             ))}
-          </ul>
+          </div>
         )}
       </div>
     </div>

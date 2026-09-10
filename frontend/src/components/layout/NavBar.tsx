@@ -47,7 +47,7 @@ export function NavBar({ user }: { user: User | null }) {
                   href={link.href}
                   className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
                     active
-                      ? "bg-navy text-white"
+                      ? "gradient-accent text-white"
                       : "text-ink-soft hover:bg-paper-dim hover:text-ink"
                   }`}
                 >
@@ -80,7 +80,7 @@ export function NavBar({ user }: { user: User | null }) {
             </Link>
             <Link
               href="/register"
-              className="rounded-md bg-navy px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-navy-dark"
+              className="btn-specular gradient-accent rounded-md px-4 py-2 text-sm font-medium text-white transition-colors"
             >
               Get started
             </Link>

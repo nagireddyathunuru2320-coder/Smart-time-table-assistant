@@ -32,9 +32,12 @@ export default async function TasksPage() {
   }
 
   return (
-    <div className="flex-1 px-6 py-8">
-      <div className="mx-auto max-w-5xl">
-        <h1 className="font-display mb-6 text-2xl font-semibold text-ink">Tasks</h1>
+    <div className="flex-1 px-6 py-8 md:px-10">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-6">
+          <h1 className="font-display text-2xl font-bold tracking-tight text-ink">Tasks</h1>
+          <p className="mt-1 text-xs text-ink-soft">Stay organized and get things done.</p>
+        </div>
         <TaskManager initialTasks={data.tasks} subjects={data.subjects} />
       </div>
     </div>

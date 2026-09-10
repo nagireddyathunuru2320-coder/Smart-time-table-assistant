@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
+import { MobileNav } from "@/components/layout/MobileNav";
+import { PageTransition } from "@/components/layout/PageTransition";
 import { getSessionToken, backendUrl } from "@/lib/session";
 import type { User } from "@/lib/types";
 
@@ -34,11 +36,16 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             <Sidebar user={user} />
             <div className="flex flex-1 flex-col overflow-y-auto">
               <TopBar user={user} />
-              <div className="flex flex-1 flex-col">{children}</div>
+              <div className="mobile-content-padding flex flex-1 flex-col">
+                <PageTransition>{children}</PageTransition>
+              </div>
             </div>
+            <MobileNav user={user} />
           </div>
         ) : (
-          <div className="flex min-h-screen flex-col">{children}</div>
+          <div className="flex min-h-screen flex-col">
+            <PageTransition>{children}</PageTransition>
+          </div>
         )}
       </body>
     </html>

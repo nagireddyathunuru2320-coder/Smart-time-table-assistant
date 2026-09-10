@@ -24,15 +24,16 @@ export default async function ConflictsPage() {
   }
 
   return (
-    <div className="flex-1 px-6 py-8">
-      <div className="mx-auto max-w-4xl">
-        <h1 className="font-display mb-2 text-2xl font-semibold text-ink">Conflicts</h1>
-        <p className="mb-6 text-ink-soft">
-          Overlapping events in your calendar are flagged here automatically.
-        </p>
+    <div className="flex-1 px-6 py-8 md:px-10">
+      <div className="mx-auto max-w-5xl">
+        <div className="mb-6">
+          <h1 className="font-display text-2xl font-bold tracking-tight text-ink">Conflicts</h1>
+          <p className="mt-1 text-xs text-ink-soft">
+            View and resolve any schedule conflicts or clashes in your timetable.
+          </p>
+        </div>
         <ConflictList initialConflicts={conflicts} />
       </div>
     </div>
   );
 }
-

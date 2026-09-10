@@ -1,8 +1,8 @@
 "use client";
 
 import {
-  Area,
-  AreaChart,
+  Bar,
+  BarChart,
   CartesianGrid,
   ResponsiveContainer,
   Tooltip,
@@ -22,27 +22,35 @@ export function DailyTrendChart({ data }: { data: DailyTrendPoint[] }) {
 
   return (
     <div className="glass-panel rounded-2xl p-5">
-      <p className="font-display text-sm font-semibold text-ink">Study time trend</p>
-      <p className="mb-4 text-xs text-ink-soft">Planned vs. actual minutes, last {data.length} days</p>
+      <div className="mb-4 flex items-center justify-between">
+        <div>
+          <p className="font-display text-sm font-semibold text-ink">Study Hours</p>
+          <p className="text-xs text-ink-soft">Daily study activity, last {data.length} days</p>
+        </div>
+      </div>
       <ResponsiveContainer width="100%" height={240}>
-        <AreaChart data={formatted}>
+        <BarChart data={formatted} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
           <defs>
-            <linearGradient id="plannedGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#8B7CFA" stopOpacity={0.35} />
-              <stop offset="95%" stopColor="#8B7CFA" stopOpacity={0} />
-            </linearGradient>
-            <linearGradient id="actualGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#6D5DFC" stopOpacity={0.5} />
-              <stop offset="95%" stopColor="#6D5DFC" stopOpacity={0} />
+            <linearGradient id="studyBarGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#0EA5E9" />
+              <stop offset="100%" stopColor="#14B8A6" />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(30,33,48,0.08)" />
-          <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#6B7280" }} axisLine={false} tickLine={false} />
-          <YAxis tick={{ fontSize: 11, fill: "#6B7280" }} axisLine={false} tickLine={false} width={32} />
-          <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid rgba(30,33,48,0.08)", fontSize: 12 }} />
-          <Area type="monotone" dataKey="planned_minutes" name="Planned" stroke="#8B7CFA" fill="url(#plannedGradient)" strokeWidth={2} />
-          <Area type="monotone" dataKey="actual_minutes" name="Actual" stroke="#6D5DFC" fill="url(#actualGradient)" strokeWidth={2} />
-        </AreaChart>
+          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(15,23,42,0.06)" />
+          <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#64748B" }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fontSize: 11, fill: "#64748B" }} axisLine={false} tickLine={false} />
+          <Tooltip
+            contentStyle={{ borderRadius: 12, border: "1px solid rgba(15,23,42,0.08)", fontSize: 12 }}
+            formatter={(val: unknown) => [`${val ?? 0} min`, "Study time"]}
+          />
+          <Bar
+            dataKey="actual_minutes"
+            name="Study time"
+            fill="url(#studyBarGradient)"
+            radius={[6, 6, 0, 0]}
+            barSize={24}
+          />
+        </BarChart>
       </ResponsiveContainer>
     </div>
   );

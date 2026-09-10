@@ -2,13 +2,12 @@
 
 import { useState } from "react";
 import { type Conflict, updateConflictStatus } from "@/lib/conflicts-api";
-import { AlertTriangle } from "lucide-react";
-import { EmptyState } from "@/components/ui/EmptyState";
+import { CalendarCheck, CheckCircle2 } from "lucide-react";
 
 const SEVERITY_STYLES: Record<string, string> = {
-  high: "bg-brick-light text-brick",
-  medium: "bg-brass-light/50 text-ink",
-  low: "bg-paper-dim text-ink-soft",
+  high: "badge-high",
+  medium: "badge-medium",
+  low: "badge-low",
 };
 
 export function ConflictList({ initialConflicts }: { initialConflicts: Conflict[] }) {
@@ -43,66 +42,86 @@ export function ConflictList({ initialConflicts }: { initialConflicts: Conflict[
   });
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5">
+      {/* Top Filter Bar */}
       <div className="flex items-center justify-between">
-        <p className="text-sm text-ink-soft">
+        <p className="text-xs font-semibold uppercase tracking-wider text-ink-soft">
           {conflicts.filter((c) => c.status === "open").length} open conflict
           {conflicts.filter((c) => c.status === "open").length === 1 ? "" : "s"}
         </p>
-        <label className="flex items-center gap-2 text-sm text-ink-soft">
+        <label className="flex items-center gap-2 text-xs font-medium text-ink-soft cursor-pointer">
           <input
             type="checkbox"
             checked={showResolved}
             onChange={(e) => setShowResolved(e.target.checked)}
-            className="h-4 w-4 accent-navy"
+            className="h-3.5 w-3.5 rounded accent-navy"
           />
           Show resolved &amp; dismissed
         </label>
       </div>
 
       {error && (
-        <p className="rounded-md bg-brick-light px-3 py-2 text-sm text-brick">{error}</p>
+        <p className="rounded-xl bg-brick-light px-4 py-2 text-xs font-medium text-brick">
+          {error}
+        </p>
       )}
 
       {sorted.length === 0 ? (
-        <EmptyState
-          icon={AlertTriangle}
-          title={showResolved ? "No conflicts at all!" : "Your schedule looks clear."}
-          description={showResolved ? "There are no resolved or dismissed conflicts." : "No open conflicts need your attention."}
-        />
+        <div className="glass-panel relative flex flex-col items-center justify-center overflow-hidden rounded-3xl p-12 text-center shadow-xs">
+          <div className="relative mb-5 flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-teal-100/90 to-sky-100/90 shadow-sm ring-1 ring-teal-200/50">
+            <CalendarCheck size={44} className="text-[#0EA5E9]" />
+            <span className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-white shadow-xs">
+              <CheckCircle2 size={16} />
+            </span>
+          </div>
+
+          <h2 className="font-display text-xl font-bold tracking-tight text-ink">
+            {showResolved ? "No conflicts at all!" : "No conflicts found"}
+          </h2>
+          <p className="mt-1.5 max-w-sm text-xs text-ink-soft leading-relaxed">
+            {showResolved
+              ? "There are no resolved or dismissed conflicts in your records."
+              : "Your schedule looks clear! Keep up the good planning."}
+          </p>
+        </div>
       ) : (
         <ul className="flex flex-col gap-3">
           {sorted.map((conflict) => (
             <li
               key={conflict.id}
-              className="glass-panel flex items-start justify-between gap-4 rounded-2xl p-5 shadow-sm"
+              className="glass-panel flex items-start justify-between gap-4 rounded-2xl p-5 shadow-xs"
             >
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   <span
-                    className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${SEVERITY_STYLES[conflict.severity]}`}
+                    className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold capitalize ${SEVERITY_STYLES[conflict.severity]}`}
                   >
                     {conflict.severity}
                   </span>
-                  <span className="rounded-full bg-paper-dim px-2 py-0.5 text-xs font-medium capitalize text-ink-soft">
+                  <span
+                    className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold capitalize ${
+                      conflict.status === "resolved" ? "badge-done" : "bg-paper px-2 py-0.5 text-ink-soft"
+                    }`}
+                  >
                     {conflict.status}
                   </span>
                 </div>
-                <p className="font-display mt-2 font-medium text-ink">{conflict.title}</p>
-                <p className="mt-1 text-sm text-ink-soft">{conflict.description}</p>
+                <p className="font-display mt-2 font-semibold text-ink">{conflict.title}</p>
+                <p className="mt-1 text-xs text-ink-soft leading-relaxed">{conflict.description}</p>
               </div>
+
               <div className="flex shrink-0 gap-2">
                 {conflict.status === "open" ? (
                   <button
                     onClick={() => handleDismiss(conflict.id)}
-                    className="rounded-md border border-ink-faint/25 px-3 py-1.5 text-sm text-ink-soft hover:bg-paper-dim"
+                    className="rounded-lg border border-ink/10 bg-white/80 px-3 py-1.5 text-xs font-semibold text-ink-soft hover:bg-paper-dim"
                   >
                     Dismiss
                   </button>
                 ) : (
                   <button
                     onClick={() => handleReopen(conflict.id)}
-                    className="rounded-md border border-ink-faint/25 px-3 py-1.5 text-sm text-ink-soft hover:bg-paper-dim"
+                    className="rounded-lg border border-ink/10 bg-white/80 px-3 py-1.5 text-xs font-semibold text-ink-soft hover:bg-paper-dim"
                   >
                     Reopen
                   </button>
@@ -115,4 +134,3 @@ export function ConflictList({ initialConflicts }: { initialConflicts: Conflict[
     </div>
   );
 }
-
