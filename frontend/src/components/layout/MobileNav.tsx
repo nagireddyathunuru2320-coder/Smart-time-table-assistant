@@ -36,7 +36,7 @@ export function MobileNav({ user }: { user: User | null }) {
             >
               <X size={16} />
             </button>
-            <Sidebar user={user} />
+            <Sidebar user={user} onNavigate={() => setDrawerOpen(false)} />
           </div>
         </div>
       )}

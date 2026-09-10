@@ -33,7 +33,7 @@ function initials(name: string): string {
   return ((parts[0]?.[0] ?? "") + (parts.length > 1 ? parts[parts.length - 1][0] : "")).toUpperCase();
 }
 
-export function Sidebar({ user }: { user: User | null }) {
+export function Sidebar({ user, onNavigate }: { user: User | null; onNavigate?: () => void }) {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -64,6 +64,7 @@ export function Sidebar({ user }: { user: User | null }) {
             <Link
               key={link.href}
               href={link.href}
+              onClick={onNavigate}
               className={`flex items-center gap-3 rounded-full px-4 py-2.5 text-sm font-medium transition-colors ${
                 active ? "gradient-accent text-white shadow-sm" : "text-white/60 hover:bg-white/5 hover:text-white"
               }`}
@@ -76,6 +77,7 @@ export function Sidebar({ user }: { user: User | null }) {
       </nav>
       <Link
         href="/settings"
+        onClick={onNavigate}
         className={`mb-3 flex items-center gap-3 rounded-full px-4 py-2.5 text-sm font-medium transition-colors ${
           pathname.startsWith("/settings") ? "gradient-accent text-white shadow-sm" : "text-white/60 hover:bg-white/5 hover:text-white"
         }`}
