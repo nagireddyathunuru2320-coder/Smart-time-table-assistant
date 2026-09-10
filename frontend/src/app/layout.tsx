@@ -34,7 +34,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         {user ? (
           <div className="flex h-screen overflow-hidden">
             <Sidebar user={user} />
-            <div className="flex flex-1 flex-col overflow-y-auto">
+            <div className="min-w-0 flex flex-1 flex-col overflow-y-auto">
               <TopBar user={user} />
               <div className="mobile-content-padding flex flex-1 flex-col">
                 <PageTransition>{children}</PageTransition>

@@ -28,7 +28,7 @@ export function MobileNav({ user }: { user: User | null }) {
             className="flex-1 bg-black/40 backdrop-blur-sm"
             onClick={() => setDrawerOpen(false)}
           />
-          <div className="relative w-64 bg-[#0B1120]">
+          <div className="mobile-drawer relative w-64 bg-[#0B1120]">
             <button
               onClick={() => setDrawerOpen(false)}
               aria-label="Close navigation menu"

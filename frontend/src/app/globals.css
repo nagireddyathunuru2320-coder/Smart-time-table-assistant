@@ -34,6 +34,7 @@ body {
   background-attachment: fixed;
   color: var(--color-ink);
   font-family: var(--font-body);
+  overflow-x: hidden;
 }
 
 ::selection {
@@ -79,6 +80,26 @@ body {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+/* Keep the desktop sidebar out of the mobile layout; the drawer opts back in. */
+.mobile-nav {
+  display: none;
+}
+@media (max-width: 767px) {
+  .desktop-sidebar {
+    display: none !important;
+  }
+  .mobile-nav {
+    display: block;
+  }
+  .mobile-content-padding {
+    padding-bottom: 5.5rem;
+  }
+  .mobile-drawer .desktop-sidebar {
+    display: flex !important;
+    width: 100%;
+  }
 }
 
 .btn-specular {
