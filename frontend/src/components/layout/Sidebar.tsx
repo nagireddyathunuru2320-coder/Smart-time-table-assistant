@@ -46,17 +46,17 @@ export function Sidebar({ user, onNavigate }: { user: User | null; onNavigate?: 
   if (!user) return null;
 
   return (
-    <aside className="desktop-sidebar flex h-full w-64 shrink-0 flex-col overflow-y-auto bg-[#0B1120] px-4 py-6">
+    <aside className="desktop-sidebar flex h-full w-64 shrink-0 flex-col overflow-y-auto bg-[#0B1120]/90 backdrop-blur-2xl px-4 py-6 border-r border-white/10 shadow-xl">
       <div className="mb-8 flex items-center gap-3 px-2">
-        <span className="gradient-accent flex h-10 w-10 items-center justify-center rounded-xl text-white shadow-sm">
+        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-teal-400 to-sky-500 text-white shadow-lg shadow-teal-500/30 border border-white/20">
           <CalendarClock size={20} />
         </span>
         <div>
-          <span className="block text-base font-bold tracking-tight text-white">Smart Timetable</span>
-          <span className="block text-[10px] tracking-wider text-white/40 uppercase">Plan · Learn · Achieve</span>
+          <span className="block text-base font-bold tracking-tight text-white drop-shadow-xs">Smart Timetable</span>
+          <span className="block text-[10px] font-semibold tracking-wider text-teal-400/90 uppercase">Plan · Learn · Achieve</span>
         </div>
       </div>
-      <nav className="flex flex-1 flex-col gap-1">
+      <nav className="flex flex-1 flex-col gap-1.5">
         {LINKS.map((link) => {
           const active = pathname === link.href || pathname.startsWith(link.href + "/");
           const Icon = link.icon;
@@ -65,11 +65,13 @@ export function Sidebar({ user, onNavigate }: { user: User | null; onNavigate?: 
               key={link.href}
               href={link.href}
               onClick={onNavigate}
-              className={`flex items-center gap-3 rounded-full px-4 py-2.5 text-sm font-medium transition-colors ${
-                active ? "gradient-accent text-white shadow-sm" : "text-white/60 hover:bg-white/5 hover:text-white"
+              className={`flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200 ${
+                active
+                  ? "bg-gradient-to-r from-teal-500 to-sky-500 text-white shadow-lg shadow-teal-500/25 border border-white/20 font-semibold"
+                  : "text-slate-400 hover:bg-white/[0.08] hover:text-white"
               }`}
             >
-              <Icon size={18} />
+              <Icon size={18} className={active ? "text-white" : "text-slate-400 group-hover:text-white"} />
               {link.label}
             </Link>
           );
@@ -78,20 +80,28 @@ export function Sidebar({ user, onNavigate }: { user: User | null; onNavigate?: 
       <Link
         href="/settings"
         onClick={onNavigate}
-        className={`mb-3 flex items-center gap-3 rounded-full px-4 py-2.5 text-sm font-medium transition-colors ${
-          pathname.startsWith("/settings") ? "gradient-accent text-white shadow-sm" : "text-white/60 hover:bg-white/5 hover:text-white"
+        className={`mb-3 flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200 ${
+          pathname.startsWith("/settings")
+            ? "bg-gradient-to-r from-teal-500 to-sky-500 text-white shadow-lg shadow-teal-500/25 border border-white/20 font-semibold"
+            : "text-slate-400 hover:bg-white/[0.08] hover:text-white"
         }`}
       >
         <SettingsIcon size={18} />
         Settings
       </Link>
-      <div className="flex items-center gap-3 rounded-2xl bg-white/5 p-3">
-        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-navy to-brass text-xs font-semibold text-white">{initials(user.full_name)}</span>
+      <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.06] p-3 backdrop-blur-md transition-colors hover:bg-white/[0.09]">
+        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-teal-400 to-sky-500 text-xs font-bold text-white shadow-xs">
+          {initials(user.full_name)}
+        </span>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium text-white">{user.full_name}</p>
-          <p className="text-xs text-white/50">Student</p>
+          <p className="truncate text-sm font-semibold text-white">{user.full_name}</p>
+          <p className="text-[11px] font-medium text-teal-300/80">Active Student</p>
         </div>
-        <button onClick={handleLogout} aria-label="Log out" className="rounded-md p-1.5 text-white/50 hover:bg-white/10 hover:text-white">
+        <button
+          onClick={handleLogout}
+          aria-label="Log out"
+          className="rounded-lg p-1.5 text-slate-400 hover:bg-white/10 hover:text-rose-400 transition-colors"
+        >
           <LogOut size={16} />
         </button>
       </div>

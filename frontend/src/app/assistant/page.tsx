@@ -9,7 +9,7 @@ export default async function AssistantPage() {
   }
 
   return (
-    <div className="flex-1 px-6 py-8 md:px-10">
+    <div className="flex-1 px-3 py-5 sm:px-6 sm:py-8 md:px-10">
       <div className="mx-auto max-w-4xl">
         <div className="mb-6">
           <h1 className="font-display text-2xl font-bold tracking-tight text-ink">Assistant</h1>

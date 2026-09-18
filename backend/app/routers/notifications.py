@@ -71,3 +71,30 @@ def update_notification(
     db.commit()
     db.refresh(notification)
     return notification
+
+
+@router.delete("/{notification_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_notification(
+    notification_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> None:
+    notification = db.get(Notification, notification_id)
+    if notification is None or notification.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Notification not found")
+
+    db.delete(notification)
+    db.commit()
+
+
+@router.delete("", status_code=status.HTTP_204_NO_CONTENT)
+def clear_all_notifications(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> None:
+    stmt = select(Notification).where(Notification.user_id == current_user.id)
+    notifications = list(db.scalars(stmt).all())
+    for n in notifications:
+        db.delete(n)
+    db.commit()
+

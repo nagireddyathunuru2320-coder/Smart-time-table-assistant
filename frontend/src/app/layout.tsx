@@ -33,6 +33,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <body className="h-full bg-paper text-ink">
         {user ? (
           <div className="flex h-screen overflow-hidden">
+            <div className="ambient-glow" />
             <Sidebar user={user} />
             <div className="min-w-0 flex flex-1 flex-col overflow-y-auto">
               <TopBar user={user} />

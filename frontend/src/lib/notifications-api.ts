@@ -39,3 +39,20 @@ export async function markAllNotificationsRead(): Promise<Notification[]> {
   const response = await fetch("/api/notifications/mark-all-read", { method: "POST" });
   return parseOrThrow(response);
 }
+
+export async function deleteNotification(id: number): Promise<void> {
+  const response = await fetch(`/api/notifications/${id}`, { method: "DELETE" });
+  if (!response.ok && response.status !== 204) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.detail ?? "Failed to delete notification");
+  }
+}
+
+export async function clearAllNotifications(): Promise<void> {
+  const response = await fetch("/api/notifications", { method: "DELETE" });
+  if (!response.ok && response.status !== 204) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.detail ?? "Failed to clear notifications");
+  }
+}
+

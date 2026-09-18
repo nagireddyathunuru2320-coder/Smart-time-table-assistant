@@ -21,7 +21,7 @@ export default async function AnalyticsPage() {
   if (summary === null) redirect("/login");
 
   return (
-    <div className="flex-1 px-6 py-8">
+    <div className="flex-1 px-3 py-5 sm:px-6 sm:py-8">
       <div className="mx-auto max-w-6xl">
         <h1 className="font-display mb-1 text-2xl font-semibold text-ink">Analytics</h1>
         <p className="mb-6 text-sm text-ink-soft">Your study habits and progress over the last two weeks.</p>

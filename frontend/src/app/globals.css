@@ -25,6 +25,20 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Hide Microsoft Edge / IE / Chromium default password reveal eye icon and clear button */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none !important;
+}
+
+input::-webkit-credentials-auto-fill-button,
+input::-webkit-contacts-auto-fill-button {
+  visibility: hidden;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+}
+
 body {
   background-color: var(--color-paper);
   background-image: 
@@ -37,24 +51,103 @@ body {
   overflow-x: hidden;
 }
 
+.ambient-glow {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.ambient-glow::before,
+.ambient-glow::after {
+  content: "";
+  position: absolute;
+  width: 480px;
+  height: 480px;
+  border-radius: 9999px;
+  filter: blur(100px);
+  opacity: 0.35;
+}
+.ambient-glow::before {
+  top: -120px;
+  left: -100px;
+  background: #0EA5E9;
+}
+.ambient-glow::after {
+  bottom: -140px;
+  right: -120px;
+  background: #14B8A6;
+}
+
 ::selection {
   background-color: rgba(20, 184, 166, 0.2);
 }
 
 .glass-panel {
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  position: relative;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.85);
-  border-radius: 1.25rem;
-  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
-  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+  border-radius: 1.5rem;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.03),
+    0 10px 25px -10px rgba(15, 23, 42, 0.08),
+    0 2px 10px -2px rgba(14, 165, 233, 0.06),
+    inset 0 1.5px 1px rgba(255, 255, 255, 0.95);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glass-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(255, 255, 255, 0.2) 35%,
+    rgba(255, 255, 255, 0) 60%,
+    rgba(56, 189, 248, 0.25) 100%
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }
 @media (hover: hover) {
   .glass-panel:hover {
-    box-shadow: 0 10px 28px -4px rgba(15, 23, 42, 0.08), 0 4px 10px -2px rgba(15, 23, 42, 0.03);
+    background: rgba(255, 255, 255, 0.84);
+    box-shadow:
+      0 4px 6px -1px rgba(15, 23, 42, 0.05),
+      0 16px 32px -12px rgba(15, 23, 42, 0.12),
+      0 6px 16px -4px rgba(14, 165, 233, 0.12),
+      inset 0 1.5px 1px rgba(255, 255, 255, 1);
     border-color: rgba(255, 255, 255, 0.95);
   }
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .glass-panel {
+    background: #FFFFFF;
+  }
+}
+
+/* Dedicated, isolated Notification Dropdown that NEVER pushes down document flow */
+.notification-dropdown {
+  position: absolute !important;
+  right: 0 !important;
+  top: calc(100% + 0.625rem) !important;
+  z-index: 9999 !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  backdrop-filter: blur(28px) saturate(200%) contrast(102%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(200%) contrast(102%) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.92) !important;
+  border-radius: 1.25rem !important;
+  box-shadow:
+    0 24px 48px -12px rgba(15, 23, 42, 0.25),
+    0 12px 28px -8px rgba(14, 165, 233, 0.2),
+    inset 0 1.5px 2px 0 rgba(255, 255, 255, 1) !important;
+  max-width: 95vw;
 }
 
 .glass-input {
@@ -71,6 +164,220 @@ body {
   box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
   outline: none;
 }
+
+/* ==========================================================================
+   AUTHENTIC FROSTED GLASS CARD (LOGIN & REGISTER)
+   Matching the reference design with optical blur, specular edges, and cyan underglow
+   ========================================================================== */
+
+.auth-glass-card {
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.58) 0%,
+    rgba(255, 255, 255, 0.38) 50%,
+    rgba(255, 255, 255, 0.22) 100%
+  );
+  backdrop-filter: blur(26px) saturate(200%) contrast(105%);
+  -webkit-backdrop-filter: blur(26px) saturate(200%) contrast(105%);
+  border: 1.5px solid rgba(255, 255, 255, 0.82);
+  border-radius: 1.5rem; /* 24px on mobile */
+  box-shadow:
+    0 25px 50px -12px rgba(15, 23, 42, 0.18),
+    0 16px 36px -8px rgba(14, 165, 233, 0.38),
+    inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1.5px 2px 0 rgba(255, 255, 255, 0.3),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.45);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              background 0.3s ease;
+}
+
+@media (min-width: 1024px) {
+  .auth-glass-card {
+    border-radius: 2rem; /* 32px on desktop */
+  }
+}
+
+/* Specular border reflection */
+.auth-glass-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: linear-gradient(
+    140deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.4) 30%,
+    rgba(255, 255, 255, 0.05) 60%,
+    rgba(56, 189, 248, 0.5) 100%
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+@media (hover: hover) {
+  .auth-glass-card:hover {
+    transform: translateY(-2px);
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.65) 0%,
+      rgba(255, 255, 255, 0.44) 50%,
+      rgba(255, 255, 255, 0.28) 100%
+    );
+    box-shadow:
+      0 32px 64px -12px rgba(15, 23, 42, 0.22),
+      0 22px 48px -10px rgba(14, 165, 233, 0.45),
+      inset 0 1.5px 2px 0 rgba(255, 255, 255, 1),
+      inset 0 -1.5px 2px 0 rgba(255, 255, 255, 0.35),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.55);
+  }
+}
+
+/* Frosted glass form inputs */
+.auth-glass-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1.5px solid rgba(255, 255, 255, 0.75);
+  border-radius: 1rem; /* 16px */
+  box-shadow:
+    inset 0 2px 4px rgba(15, 23, 42, 0.04),
+    0 1px 2px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  color: #0F172A;
+  outline: none;
+}
+
+.auth-glass-input::placeholder {
+  color: #64748B;
+  font-weight: 400;
+}
+
+.auth-glass-input:hover {
+  background: rgba(255, 255, 255, 0.62);
+  border-color: rgba(255, 255, 255, 0.95);
+}
+
+.auth-glass-input:focus {
+  background: rgba(255, 255, 255, 0.88);
+  border-color: #0EA5E9;
+  box-shadow:
+    0 0 0 3.5px rgba(14, 165, 233, 0.25),
+    inset 0 1px 2px rgba(15, 23, 42, 0.02);
+}
+
+/* Primary CTA button with vibrant cyan gradient & specular shine */
+.auth-btn-primary {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  border-radius: 1rem; /* 16px */
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: #FFFFFF;
+  background: linear-gradient(90deg, #0284c7 0%, #0ea5e9 45%, #06b6d4 100%);
+  box-shadow:
+    0 10px 24px -4px rgba(6, 182, 212, 0.42),
+    0 4px 10px -2px rgba(2, 132, 199, 0.28);
+  overflow: hidden;
+  isolation: isolate;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  border: none;
+  cursor: pointer;
+}
+
+.auth-btn-primary::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.35) 45%,
+    rgba(255, 255, 255, 0.55) 50%,
+    rgba(255, 255, 255, 0.35) 55%,
+    transparent 80%
+  );
+  transform: translateX(-120%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.auth-btn-primary:hover {
+  filter: brightness(1.04);
+  box-shadow:
+    0 14px 28px -4px rgba(6, 182, 212, 0.52),
+    0 6px 14px -2px rgba(2, 132, 199, 0.35);
+  transform: translateY(-1px);
+}
+
+.auth-btn-primary:hover::before {
+  animation: specular-sweep 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.auth-btn-primary:active {
+  transform: translateY(0) scale(0.99);
+}
+
+.auth-btn-primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  filter: none;
+  transform: none;
+}
+
+/* Sunlit window backdrop */
+.auth-sunlight-backdrop {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: #EEF2F7;
+}
+
+.auth-sunlight-backdrop::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 900px 700px at 85% 15%, rgba(255, 255, 255, 0.9), transparent 65%),
+    linear-gradient(132deg,
+      rgba(255, 255, 255, 0.7) 0%,
+      rgba(226, 232, 240, 0.1) 22%,
+      rgba(203, 213, 225, 0.3) 38%,
+      rgba(255, 255, 255, 0.6) 46%,
+      rgba(203, 213, 225, 0.35) 62%,
+      rgba(255, 255, 255, 0.45) 72%,
+      rgba(226, 232, 240, 0.2) 100%
+    );
+}
+
+/* Cyan ambient underglow behind card */
+.auth-card-ambient-glow {
+  position: absolute;
+  width: 480px;
+  height: 540px;
+  border-radius: 48px;
+  background: radial-gradient(
+    circle at 40% 65%,
+    rgba(6, 182, 212, 0.32) 0%,
+    rgba(14, 165, 233, 0.2) 40%,
+    transparent 72%
+  );
+  filter: blur(50px);
+  pointer-events: none;
+  z-index: 1;
+}
+
 
 .gradient-accent {
   background: linear-gradient(135deg, #14B8A6, #0EA5E9);
@@ -90,15 +397,8 @@ body {
   .desktop-sidebar {
     display: none !important;
   }
-  .mobile-nav {
-    display: block;
-  }
   .mobile-content-padding {
-    padding-bottom: 5.5rem;
-  }
-  .mobile-drawer .desktop-sidebar {
-    display: flex !important;
-    width: 100%;
+    padding-bottom: 6.5rem !important;
   }
 }
 

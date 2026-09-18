@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Bell, CheckSquare, GraduationCap } from "lucide-react";
+import { Bell, CheckSquare, GraduationCap, Trash2, X } from "lucide-react";
 import {
   type Notification,
   listNotifications,
   markAllNotificationsRead,
   markNotificationRead,
+  deleteNotification,
+  clearAllNotifications,
 } from "@/lib/notifications-api";
 
 async function listInAppNotifications(): Promise<Notification[]> {
@@ -95,57 +97,149 @@ export function NotificationBell() {
     }
   }
 
+  async function handleDelete(id: number, e: React.MouseEvent) {
+    e.stopPropagation();
+    setNotifications((prev) => prev.filter((notification) => notification.id !== id));
+    try {
+      await deleteNotification(id);
+    } catch {
+      refresh();
+    }
+  }
+
+  async function handleClearAll() {
+    setNotifications([]);
+    try {
+      await clearAllNotifications();
+    } catch {
+      refresh();
+    }
+  }
+
   return (
-    <div className="relative" ref={containerRef}>
+    <div className="relative inline-block" ref={containerRef}>
       <button
         aria-label="Notifications"
         aria-expanded={open}
         onClick={() => setOpen((isOpen) => !isOpen)}
-        className="relative flex h-9 w-9 items-center justify-center rounded-full bg-white text-ink-soft shadow-sm hover:text-ink"
+        className={`relative flex h-10 w-10 items-center justify-center rounded-xl border transition-all duration-200 ${
+          open
+            ? "border-sky-400 bg-sky-50 text-sky-600 shadow-md shadow-sky-500/15"
+            : "border-slate-200/80 bg-white/80 text-slate-600 shadow-xs hover:border-slate-300 hover:bg-white hover:text-slate-900"
+        }`}
       >
-        <Bell size={16} />
+        <Bell size={18} className={unreadCount > 0 ? "animate-[bounce_2s_infinite]" : ""} />
         {unreadCount > 0 && (
-          <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brick px-1 text-[10px] font-semibold text-white">
+          <span className="absolute -right-1 -top-1 flex h-4.5 min-w-[1.125rem] items-center justify-center rounded-full bg-gradient-to-r from-rose-500 to-red-600 px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-white">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="glass-panel absolute right-0 top-11 z-20 w-80 rounded-2xl p-2">
-          <div className="flex items-center justify-between px-2 py-1.5">
-            <p className="text-sm font-semibold text-ink">Notifications</p>
-            {unreadCount > 0 && (
-              <button onClick={handleMarkAllRead} className="text-xs font-medium text-navy hover:underline">
-                Mark all read
-              </button>
+        <div className="notification-dropdown w-84 sm:w-96 p-3 animate-in fade-in slide-in-from-top-2 duration-150">
+          <div className="mb-2 flex items-center justify-between border-b border-slate-100 pb-2.5 px-2">
+            <div className="flex items-center gap-2">
+              <span className="flex h-2 w-2 rounded-full bg-sky-500"></span>
+              <p className="font-display text-sm font-bold text-slate-800">Notifications</p>
+              {unreadCount > 0 && (
+                <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-semibold text-sky-700">
+                  {unreadCount} new
+                </span>
+              )}
+            </div>
+            {notifications.length > 0 && (
+              <div className="flex items-center gap-2">
+                {unreadCount > 0 && (
+                  <button
+                    onClick={handleMarkAllRead}
+                    className="text-xs font-semibold text-sky-600 hover:text-sky-800 transition-colors"
+                  >
+                    Mark read
+                  </button>
+                )}
+                <span className="text-slate-200">•</span>
+                <button
+                  onClick={handleClearAll}
+                  className="text-xs font-medium text-slate-400 hover:text-rose-600 transition-colors flex items-center gap-1"
+                  title="Delete all notifications"
+                >
+                  <Trash2 size={12} />
+                  <span>Clear</span>
+                </button>
+              </div>
             )}
           </div>
 
-          <div className="max-h-80 overflow-y-auto">
+          <div className="max-h-84 overflow-y-auto pr-0.5">
             {!loaded ? (
-              <p className="px-2 py-6 text-center text-sm text-ink-soft">Loading...</p>
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-sky-500 border-t-transparent mb-2"></div>
+                <p className="text-xs font-medium text-slate-500">Checking for updates...</p>
+              </div>
             ) : notifications.length === 0 ? (
-              <p className="px-2 py-6 text-center text-sm text-ink-soft">You&apos;re all caught up.</p>
+              <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
+                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-50 to-sky-50 border border-teal-100 text-teal-600 shadow-xs">
+                  <Bell size={20} className="text-teal-500 opacity-80" />
+                </div>
+                <p className="text-sm font-semibold text-slate-800">All caught up!</p>
+                <p className="mt-1 text-xs text-slate-500">No notifications remaining.</p>
+              </div>
             ) : (
-              <ul className="flex flex-col gap-1">
+              <ul className="flex flex-col gap-1.5">
                 {notifications.map((notification) => {
-                  const Icon = notification.notification_type === "exam_reminder" ? GraduationCap : CheckSquare;
+                  const isExam = notification.notification_type === "exam_reminder";
+                  const Icon = isExam ? GraduationCap : CheckSquare;
+                  const isUnread = notification.status === "unread";
                   return (
-                    <li key={notification.id}>
-                      <button
+                    <li key={notification.id} className="group relative">
+                      <div
                         onClick={() => handleOpen(notification.id)}
-                        className={`flex w-full items-start gap-3 rounded-xl px-2 py-2 text-left transition-colors hover:bg-paper-dim ${notification.status === "unread" ? "bg-brass-light/40" : ""}`}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") handleOpen(notification.id); }}
+                        className={`flex w-full cursor-pointer items-start gap-3 rounded-xl p-2.5 text-left transition-all duration-150 ${
+                          isUnread
+                            ? "bg-sky-50/70 hover:bg-sky-50 border border-sky-100/80"
+                            : "bg-transparent hover:bg-slate-50 border border-transparent"
+                        }`}
                       >
-                        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brass-light text-navy">
+                        <span
+                          className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-colors ${
+                            isExam
+                              ? "bg-purple-100 text-purple-700"
+                              : "bg-teal-100 text-teal-700"
+                          }`}
+                        >
                           <Icon size={15} />
                         </span>
-                        <span className="flex-1">
-                          <span className="block text-sm font-medium text-ink">{notification.title}</span>
-                          <span className="block text-xs text-ink-soft">{notification.body}</span>
-                          <span className="mt-0.5 block text-[11px] text-ink-faint">{timeAgo(notification.created_at)}</span>
+                        <span className="min-w-0 flex-1 pr-6">
+                          <span className="flex items-center justify-between gap-1">
+                            <span className={`block truncate text-xs font-semibold ${isUnread ? "text-slate-900" : "text-slate-700"}`}>
+                              {notification.title}
+                            </span>
+                            <span className="shrink-0 text-[10px] font-medium text-slate-400">
+                              {timeAgo(notification.created_at)}
+                            </span>
+                          </span>
+                          <span className="mt-0.5 block text-[11px] leading-relaxed text-slate-500 line-clamp-2">
+                            {notification.body}
+                          </span>
                         </span>
-                        {notification.status === "unread" && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-navy" />}
+                        {isUnread && (
+                          <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-sky-500 shadow-xs ring-2 ring-sky-200" />
+                        )}
+                      </div>
+
+                      {/* Delete notification button */}
+                      <button
+                        type="button"
+                        onClick={(e) => handleDelete(notification.id, e)}
+                        title="Delete notification"
+                        className="absolute right-2 top-2.5 flex h-6 w-6 items-center justify-center rounded-lg text-slate-400 opacity-60 sm:opacity-0 transition-opacity hover:bg-rose-50 hover:text-rose-600 sm:group-hover:opacity-100"
+                        aria-label="Delete notification"
+                      >
+                        <Trash2 size={13} />
                       </button>
                     </li>
                   );

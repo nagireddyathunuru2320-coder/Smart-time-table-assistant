@@ -25,7 +25,7 @@ export default async function CalendarPage() {
   }
 
   return (
-    <div className="flex-1 px-6 py-8 md:px-10">
+    <div className="flex-1 px-3 py-5 sm:px-6 sm:py-8 md:px-10">
       <div className="mx-auto max-w-7xl">
         <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>

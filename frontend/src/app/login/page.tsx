@@ -3,13 +3,15 @@
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Mail, Lock, ArrowRight, Sparkles } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles, GraduationCap } from "lucide-react";
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -18,135 +20,232 @@ function LoginForm() {
     setError(null);
     setLoading(true);
 
-    const response = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-    setLoading(false);
+      let data: any = null;
+      try {
+        data = await response.json();
+      } catch {
+        data = null;
+      }
 
-    if (!response.ok) {
-      const data = await response.json();
-      setError(typeof data.detail === "string" ? data.detail : "Login failed");
-      return;
+      setLoading(false);
+
+      if (!response.ok) {
+        const errorMsg =
+          data && typeof data.detail === "string"
+            ? data.detail
+            : data && typeof data.message === "string"
+            ? data.message
+            : response.status === 503
+            ? "Backend server is unreachable. Please ensure the backend is running."
+            : "Login failed. Please check your credentials.";
+        setError(errorMsg);
+        return;
+      }
+
+      const next = searchParams.get("next") ?? "/dashboard";
+      router.push(next);
+      router.refresh();
+    } catch {
+      setLoading(false);
+      setError("Network error. Please check your connection and try again.");
     }
-
-    const next = searchParams.get("next") ?? "/dashboard";
-    router.push(next);
-    router.refresh();
   }
 
   return (
-    <div className="flex min-h-screen bg-[#EEF2F7]">
-      {/* Left decorative branding column */}
-      <div className="relative hidden w-5/12 flex-col justify-between overflow-hidden bg-gradient-to-br from-[#0B1120] via-[#0D1B2A] to-[#0F3D3A] p-12 text-white md:flex lg:p-16">
-        <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-teal-500/10 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-20 -right-20 h-80 w-80 rounded-full bg-sky-500/10 blur-3xl pointer-events-none" />
+    <div className="relative flex min-h-screen w-full overflow-hidden lg:items-center lg:justify-between">
+      {/* Background image */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url('/images/auth-bg.jpg')" }}
+      />
+      {/* Dark overlay — stronger on mobile so form is readable */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#080E1B]/80 via-[#080E1B]/50 to-[#080E1B]/70 lg:bg-gradient-to-r lg:from-[#080E1B]/55 lg:via-transparent lg:to-transparent" />
 
-        <div className="relative z-10">
-          <div className="flex items-center gap-2 text-teal-400">
-            <Sparkles size={18} />
-            <span className="text-xs font-bold uppercase tracking-[0.25em]">Smart Timetable</span>
-          </div>
+      {/* Top right minimal navigation — desktop only */}
+      <div className="absolute right-8 top-7 z-20 hidden items-center gap-3 text-xs font-semibold tracking-[0.25em] text-slate-400/90 lg:flex">
+        <span>— PLAN</span>
+        <span>/</span>
+        <span>LEARN</span>
+        <span>/</span>
+        <span>ACHIEVE</span>
+      </div>
+
+      {/* Left panel — hidden on mobile, visible on desktop */}
+      <div className="relative z-10 hidden lg:flex lg:min-h-screen lg:w-[48%] lg:flex-col lg:justify-between lg:px-14 lg:py-10">
+        {/* Top brand header */}
+        <div className="flex items-center gap-2.5">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-teal-500 shadow-lg shadow-cyan-500/30">
+            <Sparkles size={18} className="text-white" />
+          </span>
+          <span className="text-sm font-bold tracking-widest text-white drop-shadow-md">SMART TIMETABLE</span>
         </div>
 
-        <div className="relative z-10 my-auto">
-          <h1 className="text-4xl font-extrabold leading-[1.15] tracking-tight lg:text-5xl">
-            Smarter <br />
-            Study. <br />
-            Brighter <br />
-            <span className="gradient-text">Tomorrow.</span>
+        {/* Middle Hero content */}
+        <div className="my-auto max-w-md py-6">
+          <h1 className="text-5xl xl:text-6xl font-extrabold leading-[1.08] tracking-tight text-white drop-shadow-lg">
+            Smarter
+            <br />
+            Study.
+            <br />
+            Brighter
+            <br />
+            <span className="bg-gradient-to-r from-cyan-300 via-sky-300 to-teal-200 bg-clip-text text-transparent drop-shadow">
+              Tomorrow.
+            </span>
           </h1>
-          <p className="mt-4 text-xs tracking-wider text-white/50 uppercase">
-            Organize · Plan · Learn · Achieve
+
+          <p className="mt-5 text-sm sm:text-base leading-relaxed text-slate-200/95 drop-shadow">
+            Organize your schedule, track your progress and build better study habits — all in one place.
           </p>
 
-          <div className="mt-10 max-w-xs rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
-            <p className="text-sm font-medium italic text-white/80">
-              &ldquo;Good Students Build Great Futures&rdquo;
+          {/* Quote Badge */}
+          <div className="mt-7 inline-flex items-center gap-3.5 rounded-2xl border border-white/20 bg-white/10 px-4 py-3 backdrop-blur-md shadow-2xl shadow-black/40">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-500/30 border border-cyan-400/50 text-cyan-200 shadow-inner">
+              <GraduationCap size={20} />
+            </span>
+            <p className="text-sm font-medium italic leading-snug text-white drop-shadow">
+              &ldquo;Good Students Build
+              <br />
+              Great Futures&rdquo;
             </p>
           </div>
         </div>
 
-        <div className="relative z-10">
-          <p className="text-xs text-white/40">© Smart Timetable. Built for ambitious students.</p>
+        {/* Footer */}
+        <div className="flex items-center gap-2.5 text-xs text-slate-300/90 drop-shadow">
+          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/20 text-[11px] font-bold text-white border border-white/25">
+            N
+          </span>
+          <span>© Smart Timetable. Built for ambitious students.</span>
         </div>
       </div>
 
-      {/* Right form column */}
-      <div className="flex flex-1 items-center justify-center p-6 md:p-12">
-        <div className="glass-panel w-full max-w-md rounded-3xl p-8 sm:p-10">
-          <div className="mb-6 text-center">
-            <h2 className="font-display text-2xl font-bold tracking-tight text-ink">Welcome Back</h2>
-            <p className="mt-1.5 text-xs text-ink-soft">Sign in to continue to your workspace</p>
+      {/* Mobile top bar — visible only on mobile */}
+      <div className="absolute left-0 right-0 top-0 z-20 flex items-center gap-2.5 px-5 py-5 lg:hidden">
+        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-teal-500 shadow-lg shadow-cyan-500/30">
+          <Sparkles size={18} className="text-white" />
+        </span>
+        <span className="text-sm font-bold tracking-widest text-white drop-shadow-md">SMART TIMETABLE</span>
+      </div>
+
+      {/* Right panel (Floating Frosted Glass Card) */}
+      <div className="relative z-10 flex min-h-screen w-full flex-col items-center justify-center px-3 pb-6 pt-20 sm:px-5 lg:min-h-0 lg:flex-1 lg:px-12 lg:py-10">
+        {/* Cyan ambient underglow leaking beneath the glass card */}
+        <div className="auth-card-ambient-glow" />
+
+        {/* THE AUTHENTIC FROSTED GLASS CARD */}
+        <div className="auth-glass-card relative z-10 w-full p-6 sm:p-8 lg:max-w-[420px] lg:p-9">
+          {/* Card Header */}
+          <div className="mb-7 flex flex-col items-center text-center">
+            <span className="mb-4 flex h-13 w-13 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0B1528] via-[#0F1D36] to-[#0A101D] border border-cyan-400/40 shadow-xl shadow-cyan-950/30">
+              <Sparkles size={22} className="text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.7)]" />
+            </span>
+            <h2 className="text-2xl sm:text-[28px] font-bold tracking-tight text-slate-900">
+              Welcome Back
+            </h2>
+            <p className="mt-1.5 text-sm font-medium text-slate-500">
+              Sign in to continue to your workspace
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div>
-              <label className="mb-1.5 block text-xs font-semibold text-ink">Email</label>
+              <label className="mb-2 block text-sm font-semibold text-slate-700">Email</label>
               <div className="relative">
-                <Mail className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-faint" size={16} />
+                <Mail
+                  size={17}
+                  className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"
+                />
                 <input
                   type="email"
                   required
+                  placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  className="glass-input w-full py-2.5 pl-10 pr-4 text-sm text-ink outline-none"
+                  className="auth-glass-input py-3 pl-11 pr-4 text-sm font-medium"
                 />
               </div>
             </div>
 
             <div>
-              <label className="mb-1.5 block text-xs font-semibold text-ink">Password</label>
+              <label className="mb-2 block text-sm font-semibold text-slate-700">Password</label>
               <div className="relative">
-                <Lock className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-faint" size={16} />
+                <Lock
+                  size={17}
+                  className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"
+                />
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   required
+                  placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  className="glass-input w-full py-2.5 pl-10 pr-4 text-sm text-ink outline-none"
+                  className="auth-glass-input py-3 pl-11 pr-11 text-sm font-medium"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((s) => !s)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 transition-colors p-1"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                </button>
               </div>
             </div>
 
-            <div className="flex items-center justify-between text-xs text-ink-soft">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" className="h-3.5 w-3.5 rounded accent-navy" />
+            <div className="flex items-center justify-between text-sm pt-0.5">
+              <label className="flex items-center gap-2 text-slate-700 font-medium cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-400 accent-sky-600 cursor-pointer"
+                />
                 <span>Remember me</span>
               </label>
-              <span className="cursor-pointer text-navy hover:underline">Forgot password?</span>
+              <Link href="#" className="font-semibold text-sky-600 hover:text-sky-700 hover:underline transition-colors">
+                Forgot password?
+              </Link>
             </div>
 
             {error && (
-              <p className="rounded-xl bg-brick-light px-3.5 py-2.5 text-xs font-medium text-brick">
+              <div className="rounded-xl border border-rose-200 bg-rose-50/95 px-3.5 py-2.5 text-sm font-medium text-rose-700">
                 {error}
-              </p>
+              </div>
             )}
 
             <button
               type="submit"
               disabled={loading}
-              className="btn-specular gradient-accent mt-2 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white shadow-md disabled:opacity-50"
+              className="auth-btn-primary mt-2"
             >
               <span>{loading ? "Signing in..." : "Sign In"}</span>
-              <ArrowRight size={16} />
+              {!loading && <ArrowRight size={17} className="transition-transform group-hover:translate-x-0.5" />}
             </button>
           </form>
 
-          <p className="mt-6 text-center text-xs text-ink-soft">
+          <p className="mt-6 text-center text-sm text-slate-600">
             Don&apos;t have an account?{" "}
-            <Link href="/register" className="font-semibold text-navy hover:underline">
+            <Link href="/register" className="font-semibold text-sky-600 hover:text-sky-700 hover:underline transition-colors">
               Register
             </Link>
           </p>
-
-          <p className="mt-4 text-center text-[11px] text-ink-faint italic">
+          <p className="mt-3 text-center text-xs italic text-slate-400 font-normal">
             Don&apos;t just study. Build a better you.
           </p>
+        </div>
+
+        {/* Mobile footer */}
+        <div className="mt-6 flex items-center justify-center gap-2 text-xs text-slate-300/80 drop-shadow lg:hidden">
+          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20 text-[10px] font-bold text-white border border-white/25">N</span>
+          <span>© Smart Timetable. Built for ambitious students.</span>
         </div>
       </div>
     </div>
